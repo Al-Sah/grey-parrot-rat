@@ -10,4 +10,4 @@ configure_file(bot-version.h.in bot-version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
-add_executable(gray-parrot-bot main.cpp Bot.cpp Bot.h)
+add_executable(gray-parrot-bot main.cpp Bot.cpp Bot.h platform.h)
