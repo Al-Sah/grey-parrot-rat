@@ -2,8 +2,8 @@
 // Created by alsah on 12.03.23.
 //
 
-#ifndef GREY_PARROT_CLIENTS_PLATFORM_H
-#define GREY_PARROT_CLIENTS_PLATFORM_H
+#ifndef GREY_PARROT_BOT_PLATFORM_H
+#define GREY_PARROT_BOT_PLATFORM_H
 
 /**
  * Determination a platform of an operation system
@@ -41,8 +41,4 @@
     #define PLATFORM_ARCHITECTURE 0
 #endif
 
-
-
-
-
-#endif //GREY_PARROT_CLIENTS_PLATFORM_H
+#endif //GREY_PARROT_BOT_PLATFORM_H

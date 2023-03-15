@@ -3,13 +3,20 @@
 //
 
 #include "Bot.h"
-#include "bot-version.h"
 
 #include <iostream>
 #include <csignal>
-#include <fstream>
-#include <sstream>
-#include <sys/utsname.h>
+#include <thread>
+
+#if defined(PLATFORM_IS_LINUX)
+    #include "platform-info/collectors/LinuxInfoCollector.h"
+    #define GENERATE_BOT_INSTANCE()new Bot(std::unique_ptr<IDeviceDetailsCollector>(new LinuxInfoCollector()))
+#elif defined(PLATFORM_IS_WINDOWS)
+    #include "platform-info/collectors/WinInfoCollector.h"
+    #define GENERATE_BOT_INSTANCE()new Bot(std::unique_ptr<IDeviceDetailsCollector>(new WinInfoCollector()))
+#else
+    #error "platform is not supported"
+#endif
 
 
 // Initialization of static fields
@@ -30,47 +37,41 @@ void Bot::handleSystemSignal(int signal) {
     Bot::run = false;
 }
 
-Bot::Bot() :
-    botVersion(GREY_PARROT_BOT_VERSION),
-    computerId(retrieveComputerId()){
-
-    // Register signal handlers
-    std::signal(SIGINT, handleSystemSignal);
-    std::signal(SIGTERM, handleSystemSignal);
-}
-
 Bot *Bot::GetInstance() {
     if(bot == nullptr){
-        bot = new Bot();
+        bot = GENERATE_BOT_INSTANCE();
     }
     return bot;
 }
 
 int Bot::runPerpetual() {
+    Bot::GetInstance();
+
     while (Bot::run){
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     return 0;
 }
 
 
-std::string Bot::retrieveComputerId() {
-    utsname unameData{};
-    uname(&unameData);
+Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
+    applicationDetails(),
+    deviceDetails(infoCollector->getDeviceDetails()){
 
-    std::stringstream ss;
-    ss << unameData.sysname << unameData.nodename << unameData.machine;
+    // Register signal handlers
+    std::signal(SIGINT, handleSystemSignal);
+    std::signal(SIGTERM, handleSystemSignal);
 
-    std::ifstream cpuinfo ("/proc/cpuinfo");
-    if (cpuinfo.is_open()) {
-
-        // read just first 4 lines of cpuinfo (starting from second); it contains:
-        // vendor_id, cpu family, model, model name
-        std::string fileLine;
-        for (int lines = 1; lines < 5 && std::getline(cpuinfo, fileLine); ++lines){
-            ss << fileLine;
-        }
-    }
-    // TODO get serial number ? (Just right now it is probably enough to use nodename + cpuinfo )
-    return "bot-" + std::to_string(std::hash<std::string>()(ss.str()));
+    // TODO: add logger
+    std::cout
+            << "isRoot:      " << applicationDetails.isRoot << std::endl
+            << "startTime:   " << applicationDetails.startTime << std::endl
+            << "Version:     " << applicationDetails.botVersion << std::endl
+            << "compiledFor: " << applicationDetails.compiledFor << std::endl
+            << "Arc:         " << (std::uint16_t)applicationDetails.compiledForArc << std::endl
+            << std::endl
+            << "OSFullName: " << deviceDetails.osFullName << std::endl
+            << "computerId: " << deviceDetails.computerId << std::endl
+            << "computerName: " << deviceDetails.computerName << std::endl
+            << std::endl;
 }
