@@ -9,6 +9,12 @@ option(BUILD_BOT_APP "Build 'bot' component" ON)
 option(BUILD_OPERATOR_APP "Build app with GUI for the operator" ON)
 
 
+include(cmake/manage-3d-parties.cmake)
+
+get_libdatachannel_project()
+get_nlohmann_json_project()
+
+
 if(BUILD_BOT_APP)
     add_subdirectory(bot)
 endif()

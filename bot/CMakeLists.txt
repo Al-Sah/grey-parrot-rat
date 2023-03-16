@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 configure_file(app-info/bot-version.h.in bot-version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+# sd-party libs
+include_directories(${LIBDATACHANNEL_INCLUDES} ${NLOHMANN_JSON_INCLUDES})
+
 
 set(BOT_COMMON_SOURCES main.cpp Bot.cpp app-info/ApplicationDetails.cpp)
 
@@ -36,3 +39,8 @@ add_executable(gray-parrot-bot
         ${BOT_COMMON_HEADERS}
         ${BOT_PLATFORM_DEPEND_HEADERS}
         )
+
+target_link_libraries(gray-parrot-bot libdatachannel)
+
+add_dependencies(gray-parrot-bot sd-party-libdatachannel)
+add_dependencies(gray-parrot-bot sd-party-nlohmann-json)
