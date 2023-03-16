@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(operator-app VERSION 0.0.1 LANGUAGES CXX)
 
+include(../cmake/utils.cmake)
+
 # default properties
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -22,11 +24,23 @@ set(PROJECT_SOURCES
 configure_file(operator-app-version.h.in operator-app-version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-
-
 add_executable(operator-app ${PROJECT_SOURCES})
 
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
-target_link_libraries(operator-app PRIVATE Qt5::Widgets)
-set_target_properties(operator-app PROPERTIES WIN32_EXECUTABLE TRUE)
+check_platform_and_compiler()
+
+
+# set(QT_DIR "C:/Qt/5.15.2/mingw81_64/")
+# set(QT_DIR "/opt/Qt/5.15.2/gcc_64/")
+# # pass as -DQT_DIR_PATH:STRING="/opt/Qt/5.15.2/gcc_64/"
+SET(QT_DIR_PATH "" CACHE STRING "path to qt library")
+find_qt_libraries()
+
+target_link_libraries(operator-app PRIVATE
+        Qt${USING_QT}::Core
+        Qt${USING_QT}::Widgets
+        )
+
+if (WIN32)
+    set_target_properties(operator-app PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
