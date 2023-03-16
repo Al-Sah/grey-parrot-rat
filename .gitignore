@@ -10,7 +10,7 @@ out/
 
 ### CMake template
 cmake-build-*/
-CMakeLists.txt.user
+CMakeLists.txt.user*
 CMakeCache.txt
 
 
