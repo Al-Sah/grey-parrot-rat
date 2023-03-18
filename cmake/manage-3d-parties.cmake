@@ -9,8 +9,19 @@ macro(get_libdatachannel_project)
 
     set(LIBDATACHANNEL_PROJECT  "${CMAKE_CURRENT_BINARY_DIR}/libdatachannel")
     set(LIBDATACHANNEL_INCLUDES "${LIBDATACHANNEL_PROJECT}/res/include")
-    set(LIBDATACHANNEL_BINARIES "${LIBDATACHANNEL_PROJECT}/res/lib")
     set(LIBDATACHANNEL_LIB_NAME "${CMAKE_SHARED_LIBRARY_PREFIX}datachannel${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
+
+    if(WIN32)
+        set(LIBDATACHANNEL_BINARIES "${LIBDATACHANNEL_PROJECT}/res/bin")
+        set(BUILD_BYPRODUCTS_VALUE "${LIBDATACHANNEL_BINARIES}/${LIBDATACHANNEL_LIB_NAME}")
+        if(MINGW)
+            list(APPEND BUILD_BYPRODUCTS_VALUE ";${LIBDATACHANNEL_PROJECT}/res/lib/libdatachannel.dll.a")
+        endif()
+    else()
+        set(LIBDATACHANNEL_BINARIES "${LIBDATACHANNEL_PROJECT}/res/lib")
+        set(BUILD_BYPRODUCTS_VALUE "${LIBDATACHANNEL_BINARIES}/${LIBDATACHANNEL_LIB_NAME}")
+    endif()
 
     set(LIBDATACHANNEL_CMAKE_ARGS
             # environment
@@ -23,6 +34,23 @@ macro(get_libdatachannel_project)
             -DNO_EXAMPLES:BOOL=ON
             -DNO_TESTS:BOOL=ON
             )
+
+    if(WIN32)
+        # OPENSSL_PATH can be something like "C:/Program\ Files/FireDaemon\ OpenSSL\ 3"
+        if(NOT OPENSSL_PATH STREQUAL "")
+            message(STATUS "Passing OPENSSL_ROOT_DIR variable to libdatachannel project: \"${OPENSSL_PATH}\"")
+            list(APPEND LIBDATACHANNEL_CMAKE_ARGS -DOPENSSL_ROOT_DIR:PATH=${OPENSSL_PATH})
+        endif()
+
+        if(MINGW)
+            # for libsrtp2 because it cant be normally compiled with mingw; Bug ...
+            list(APPEND LIBDATACHANNEL_CMAKE_ARGS -DBUILD_WITH_WARNINGS:BOOL=OFF)
+        endif()
+        if(CROSSCOMPILING_ON_LINUX_WITH_MINGW)
+            # TODO Fix it; cross-compilation is not available yet
+            list(APPEND LIBDATACHANNEL_CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE:PATH=${PROJECT_SOURCE_DIR}/cmake/linux-x86_64-w64-mingw32-toolcahin.cmake)
+        endif()
+    endif()
 
 
     ExternalProject_Add(sd-party-libdatachannel
@@ -56,7 +84,7 @@ macro(get_libdatachannel_project)
             #  it fails with "${CMAKE_COMMAND} --build . --target datachannel-static"
             # BUILD_COMMAND       "${CMAKE_COMMAND};--build;.;--target datachannel-static" - passed
             # TODO: Use static version of this library
-            BUILD_BYPRODUCTS    "${LIBDATACHANNEL_BINARIES}/${LIBDATACHANNEL_LIB_NAME}"
+            BUILD_BYPRODUCTS    "${BUILD_BYPRODUCTS_VALUE}"
             # https://stackoverflow.com/questions/54866067/cmake-and-ninja-missing-and-no-known-rule-to-make-it
 
             # Test step
@@ -69,14 +97,20 @@ macro(get_libdatachannel_project)
             LOG_INSTALL     ON
             )
 
-    #add_library(libdatachannel SHARED IMPORTED)
     add_library(libdatachannel SHARED IMPORTED)
 
     #set_target_properties(libdatachannel PROPERTIES IMPORTED_LOCATION ${LIBDATACHANNEL_BINARIES}/libdatachannel.so)
     # This project does not provide install option for the static library, so use dynamic (fix it in future)
-    set_target_properties(libdatachannel PROPERTIES
-            IMPORTED_LOCATION ${LIBDATACHANNEL_BINARIES}/${LIBDATACHANNEL_LIB_NAME}
-            )
+    if(WIN32)
+        set_target_properties(libdatachannel PROPERTIES
+                IMPORTED_LOCATION "${LIBDATACHANNEL_BINARIES}/${LIBDATACHANNEL_LIB_NAME}"
+                IMPORTED_IMPLIB "${LIBDATACHANNEL_PROJECT}/res/lib/libdatachannel.dll.a"
+                )
+    else()
+        set_target_properties(libdatachannel PROPERTIES
+                IMPORTED_LOCATION "${LIBDATACHANNEL_BINARIES}/${LIBDATACHANNEL_LIB_NAME}"
+                )
+    endif()
 
 endmacro()
 
