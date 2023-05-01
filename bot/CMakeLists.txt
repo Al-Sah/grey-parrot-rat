@@ -23,6 +23,7 @@ set(BOT_COMMON_SOURCES
         app-info/ApplicationDetails.cpp
 
         core/networking/ConnectionsManager.cpp
+        core/networking/ControlMessageHeader.cpp
         core/networking/C2ServerChannel.cpp
         )
 
@@ -33,6 +34,7 @@ set(BOT_COMMON_HEADERS
         app-info/ApplicationDetails.h
 
         core/networking/ConnectionsManager.h
+        core/networking/ControlMessageHeader.h
         core/networking/ChannelState.h
         core/networking/C2ServerChannel.h
         )
