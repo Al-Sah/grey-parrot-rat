@@ -10,16 +10,31 @@ configure_file(app-info/bot-version.h.in bot-version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # sd-party libs
-include_directories(${LIBDATACHANNEL_INCLUDES} ${NLOHMANN_JSON_INCLUDES})
+include_directories(
+        ${LIBDATACHANNEL_INCLUDES}
+        ${NLOHMANN_JSON_INCLUDES}
+        #${WEBSOCKETPP_INCLUDES}
+        )
 
 
-set(BOT_COMMON_SOURCES main.cpp Bot.cpp app-info/ApplicationDetails.cpp)
+set(BOT_COMMON_SOURCES
+        main.cpp
+        Bot.cpp
+        app-info/ApplicationDetails.cpp
+
+        core/networking/ConnectionsManager.cpp
+        core/networking/C2ServerChannel.cpp
+        )
 
 set(BOT_COMMON_HEADERS
         Bot.h
         app-info/platform.h
         platform-info/DeviceDetails.h
         app-info/ApplicationDetails.h
+
+        core/networking/ConnectionsManager.h
+        core/networking/ChannelState.h
+        core/networking/C2ServerChannel.h
         )
 
 
@@ -44,3 +59,4 @@ target_link_libraries(gray-parrot-bot libdatachannel)
 
 add_dependencies(gray-parrot-bot sd-party-libdatachannel)
 add_dependencies(gray-parrot-bot sd-party-nlohmann-json)
+#add_dependencies(gray-parrot-bot sd-party-websocketpp)

@@ -45,11 +45,18 @@ Bot *Bot::GetInstance() {
 }
 
 int Bot::runPerpetual() {
+
     Bot::GetInstance();
 
+    bot->connectionsManager->start();
+
     while (Bot::run){
+        // FIXME: implement 'awake' for the sleeping thread ?
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
+
+    bot->connectionsManager->stop();
+
     return 0;
 }
 
@@ -74,4 +81,9 @@ Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
             << "computerId: " << deviceDetails.computerId << std::endl
             << "computerName: " << deviceDetails.computerName << std::endl
             << std::endl;
+
+    connectionsManager = std::make_shared<ConnectionsManager>(
+            ConnectionsManagerConfiguration(deviceDetails.computerId)
+            );
+
 }

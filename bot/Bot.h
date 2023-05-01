@@ -11,6 +11,8 @@
 #include "platform-info/DeviceDetails.h"
 #include "app-info/ApplicationDetails.h"
 
+#include "core/networking/ConnectionsManager.h"
+
 class Bot {
 
 public:
@@ -26,6 +28,9 @@ private:
 
     static Bot* bot;
     explicit Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector);
+
+    std::shared_ptr<ConnectionsManager> connectionsManager;
+
 
     DeviceDetails deviceDetails;
     ApplicationDetails applicationDetails;
