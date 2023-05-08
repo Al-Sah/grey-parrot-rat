@@ -25,7 +25,9 @@ bool C2ServerChannel::open(const std::string& server, const std::string& path, b
 
 void C2ServerChannel::close([[maybe_unused]] const std::string& reason) {
 
+    std::unique_lock<std::mutex> lock(mutex);
     run = false;
+    run_cv.notify_one();
 
     if(!ws->isClosed()){
         ws->close();
@@ -108,7 +110,8 @@ void C2ServerChannel::recoverConnection() {
             break;
         }
         state = ChannelState::WAITING_TO_RECOVER;
-        std::this_thread::sleep_for(std::chrono::seconds (config.sleepToRecover));
+        std::unique_lock<std::mutex> lock(mutex);
+        run_cv.wait_for( lock,std::chrono::seconds(config.sleepToRecover));
     }
 }
 

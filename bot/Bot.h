@@ -7,11 +7,14 @@
 
 #include <string>
 #include <memory>
+#include <mutex>
+#include <condition_variable>
 
 #include "platform-info/DeviceDetails.h"
 #include "app-info/ApplicationDetails.h"
 
 #include "core/networking/ConnectionsManager.h"
+#include "core/BS_thread_pool.hpp"
 
 class Bot {
 
@@ -25,6 +28,10 @@ public:
 
 private:
     static volatile bool run;
+    static std::mutex mutex;
+    static std::condition_variable run_cv;
+
+    static BS::thread_pool pool;
 
     static Bot* bot;
     explicit Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector);

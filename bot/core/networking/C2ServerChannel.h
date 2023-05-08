@@ -84,6 +84,8 @@ private:
 
     const C2ServerChannelConfiguration config;
 
+    std::mutex mutex;
+    std::condition_variable run_cv;
     volatile bool run;
 
     rtc::WebSocket::Configuration wsConfig{};

@@ -22,6 +22,9 @@
 // Initialization of static fields
 Bot* Bot::bot = nullptr;
 volatile bool Bot::run = true;
+std::mutex Bot::mutex{};
+std::condition_variable Bot::run_cv{};
+BS::thread_pool Bot::pool{};
 
 
 void Bot::handleSystemSignal(int signal) {
@@ -34,7 +37,10 @@ void Bot::handleSystemSignal(int signal) {
             std::cout << "Unexpectedly received signal " << signal << std::endl;
             break;
     }
+    std::lock_guard<std::mutex> lock(Bot::mutex);
+    std::cout << "\nsending notification\b";
     Bot::run = false;
+    Bot::run_cv.notify_one();
 }
 
 Bot *Bot::GetInstance() {
@@ -48,14 +54,16 @@ int Bot::runPerpetual() {
 
     Bot::GetInstance();
 
-    bot->connectionsManager->start();
+    auto result = pool.submit([](){bot->connectionsManager->start();});
 
     while (Bot::run){
-        // FIXME: implement 'awake' for the sleeping thread ?
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::unique_lock<std::mutex> lock(Bot::mutex);
+        Bot::run_cv.wait_for( lock,std::chrono::seconds(1));
     }
+    std::cout << "exited main loop, stopping services\n";
 
     bot->connectionsManager->stop();
+    result.get();
 
     return 0;
 }
