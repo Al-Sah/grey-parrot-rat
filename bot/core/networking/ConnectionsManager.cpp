@@ -17,8 +17,8 @@ ConnectionsManager::ConnectionsManager(ConnectionsManagerConfiguration config) :
             [this](){
                 std::cout << "c2Server channel opened";
                 },
-            [this](const std::vector<std::byte>& data){
-                std::cout << "c2Server channel received message";
+            [this](std::vector<std::byte> data){
+                handleC2ServerMessage(data);
                 },
                 60
             );
@@ -36,4 +36,23 @@ void ConnectionsManager::start() {
 
 void ConnectionsManager::stop() {
     c2ServerChannel->close();
+}
+
+void ConnectionsManager::setTasksHandler(std::shared_ptr<ITasksRegister> tasksRegisterPtr) {
+    this->tasksRegister = std::move(tasksRegisterPtr);
+}
+
+void ConnectionsManager::handleC2ServerMessage(std::vector<std::byte> &data) {
+    std::cout << "c2Server channel received message";
+    auto header = ControlMessageHeader(data);
+
+    if(!header.isValid()){
+        std::cout << "received message has invalid header; error: " << header.getError();
+        return;
+    }
+    //remove parsed part
+    data.erase(data.begin(), data.begin() + header.getHeaderSize());
+
+    tasksRegister->addTask(header, data);
+
 }

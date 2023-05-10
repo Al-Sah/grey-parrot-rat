@@ -139,3 +139,35 @@ bool ControlMessageHeader::isValid() const {
 const std::string &ControlMessageHeader::getError() const {
     return error;
 }
+
+uint16_t ControlMessageHeader::getHeaderSize() const {
+    return headerSize;
+}
+
+uint64_t ControlMessageHeader::getRequestId() const {
+    return requestId;
+}
+
+ControlMessageHeader::MessageType ControlMessageHeader::getMessageType() const {
+    return messageType;
+}
+
+const std::optional<std::uint32_t> &ControlMessageHeader::getFullPayloadSize() const {
+    return fullPayloadSize;
+}
+
+const std::optional<std::uint16_t> &ControlMessageHeader::getParts() const {
+    return parts;
+}
+
+const std::optional<bool> &ControlMessageHeader::getAccumulate() const {
+    return accumulate;
+}
+
+const std::optional<std::string> &ControlMessageHeader::getModuleId() const {
+    return moduleId;
+}
+
+const std::optional<std::uint16_t> &ControlMessageHeader::getSequence() const {
+    return sequence;
+}

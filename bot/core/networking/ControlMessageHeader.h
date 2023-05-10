@@ -30,6 +30,22 @@ public:
     [[nodiscard]] bool isValid() const;
     [[nodiscard]] const std::string &getError() const;
 
+    [[nodiscard]] uint16_t getHeaderSize() const;
+
+    [[nodiscard]] uint64_t getRequestId() const;
+
+    [[nodiscard]] MessageType getMessageType() const;
+
+    [[nodiscard]] const std::optional<std::uint32_t> &getFullPayloadSize() const;
+
+    [[nodiscard]] const std::optional<std::uint16_t> &getParts() const;
+
+    [[nodiscard]] const std::optional<bool> &getAccumulate() const;
+
+    [[nodiscard]] const std::optional<std::string> &getModuleId() const;
+
+    [[nodiscard]] const std::optional<std::uint16_t> &getSequence() const;
+
 
 private:
 

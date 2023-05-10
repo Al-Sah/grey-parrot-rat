@@ -90,8 +90,16 @@ Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
             << "computerName: " << deviceDetails.computerName << std::endl
             << std::endl;
 
+    // setup services
+
     connectionsManager = std::make_shared<ConnectionsManager>(
             ConnectionsManagerConfiguration(deviceDetails.computerId)
             );
+
+    tasksManager = std::make_shared<TasksManager>();
+
+    // setup dependencies between services
+
+    connectionsManager->setTasksHandler(std::shared_ptr<ITasksRegister>(tasksManager.get()));
 
 }

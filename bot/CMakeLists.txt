@@ -25,7 +25,7 @@ set(BOT_COMMON_SOURCES
         core/networking/ConnectionsManager.cpp
         core/networking/ControlMessageHeader.cpp
         core/networking/C2ServerChannel.cpp
-        )
+        core/tasks-managing/TasksManager.cpp)
 
 set(BOT_COMMON_HEADERS
         Bot.h
@@ -37,7 +37,7 @@ set(BOT_COMMON_HEADERS
         core/networking/ControlMessageHeader.h
         core/networking/ChannelState.h
         core/networking/C2ServerChannel.h
-        )
+        core/tasks-managing/TasksManager.h)
 
 
 if (WIN32)

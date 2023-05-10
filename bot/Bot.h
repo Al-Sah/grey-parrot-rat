@@ -15,6 +15,7 @@
 
 #include "core/networking/ConnectionsManager.h"
 #include "core/BS_thread_pool.hpp"
+#include "core/tasks-managing/TasksManager.h"
 
 class Bot {
 
@@ -37,6 +38,7 @@ private:
     explicit Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector);
 
     std::shared_ptr<ConnectionsManager> connectionsManager;
+    std::shared_ptr<TasksManager> tasksManager;
 
 
     DeviceDetails deviceDetails;

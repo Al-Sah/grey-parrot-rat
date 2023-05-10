@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "C2ServerChannel.h"
+#include "../tasks-managing/ITasksRegister.h"
 
 
 struct ConnectionsManagerConfiguration {
@@ -31,6 +32,7 @@ public:
     explicit ConnectionsManager(ConnectionsManagerConfiguration config);
     ~ConnectionsManager();
 
+    void setTasksHandler(std::shared_ptr<ITasksRegister> tasksRegister);
 
     ConnectionsManager(ConnectionsManager&) = delete;
     ConnectionsManager(const ConnectionsManager&) = delete;
@@ -46,7 +48,11 @@ private:
 
     ConnectionsManagerConfiguration config;
 
+    std::shared_ptr<ITasksRegister> tasksRegister;
+
     std::unique_ptr<C2ServerChannel> c2ServerChannel;
+
+    void handleC2ServerMessage(std::vector<std::byte>& data);
 
 };
 
