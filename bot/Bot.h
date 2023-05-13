@@ -17,6 +17,8 @@
 #include "core/BS_thread_pool.hpp"
 #include "core/tasks-managing/TasksManager.h"
 
+#include "../modules-sdk/Module.h"
+
 class Bot {
 
 public:
