@@ -28,9 +28,12 @@ set(BOT_COMMON_SOURCES
         core/tasks-managing/TasksManager.cpp
         core/tasks-managing/TasksMap.cpp
         core/TasksCreator.cpp
+        core/modules-managing/ModulesManager.cpp
 
         ../modules-sdk/Module.cpp
-        ../modules-sdk/TaskExecutor.cpp)
+        ../modules-sdk/TaskExecutor.cpp
+        )
+
 
 set(BOT_COMMON_HEADERS
         Bot.h
@@ -50,7 +53,11 @@ set(BOT_COMMON_HEADERS
 
         core/TasksCreator.h
         core/tasks-managing/TasksMap.h
-        core/tasks-managing/TaskInfo.h)
+        core/tasks-managing/TaskInfo.h
+        core/modules-managing/ModulesManager.h
+
+        core/modules-managing/ITaskDelegator.h
+        )
 
 
 if (WIN32)
