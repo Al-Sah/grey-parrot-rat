@@ -8,24 +8,12 @@
 #include <string>
 #include <queue>
 #include <list>
+#include <thread>
 #include "ITasksRegister.h"
 #include "../networking/ControlMessageHeader.h"
-
-
-enum class TaskState{
-
-    REGISTERED,   // waiting to the free thread to start executing
-    ACCUMULATING, // is used if module can not handle partial messages
-    EXECUTING,    // task was passed to the execution
-    CLOSING       // module requested to close task
-};
-
-class Task{
-
-    std::string task_id;
-    std::string module_id;
-    TaskState state;
-};
+#include "../../../modules-sdk/Task.h"
+#include "../../../modules-sdk/TaskResult.h"
+#include "TasksMap.h"
 
 
 class TasksManager : public ITasksRegister {
@@ -38,9 +26,22 @@ private:
     volatile bool run = true;
 
 
-    std::list<Task> tasks;
+    TasksMap tasks;
 
-    //std::queue<std::pair<ControlMessageHeader,std::vector<std::byte>>> inboxMessages;
+
+    Task handleSingleMessage(const ControlMessageHeader& header, std::vector<std::byte> payload);
+
+    std::optional<Task> handleFirstMessage(
+            const ControlMessageHeader& header,
+            std::vector<std::byte> payload);
+
+    std::optional<Task> handleContinuationMessage(
+            const ControlMessageHeader& header,
+            std::vector<std::byte> payload);
+
+    Task handleLastMessage(const ControlMessageHeader& header, std::vector<std::byte> payload);
+
+
 };
 
 

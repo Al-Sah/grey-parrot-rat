@@ -26,8 +26,8 @@ set(BOT_COMMON_SOURCES
         core/networking/ControlMessageHeader.cpp
         core/networking/C2ServerChannel.cpp
         core/tasks-managing/TasksManager.cpp
-        #core/tasks-managing/TasksMap.cpp
-        #core/TasksCreator.cpp
+        core/tasks-managing/TasksMap.cpp
+        core/TasksCreator.cpp
 
         ../modules-sdk/Module.cpp
         ../modules-sdk/TaskExecutor.cpp)
@@ -48,9 +48,9 @@ set(BOT_COMMON_HEADERS
         ../modules-sdk/TaskExecutor.h
         ../modules-sdk/Task.h
 
-        #core/TasksCreator.h
-        #core/tasks-managing/TasksMap.h
-        )
+        core/TasksCreator.h
+        core/tasks-managing/TasksMap.h
+        core/tasks-managing/TaskInfo.h)
 
 
 if (WIN32)
