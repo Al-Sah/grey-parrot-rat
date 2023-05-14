@@ -9,24 +9,33 @@
 #include <queue>
 #include <list>
 #include <thread>
-#include "ITasksRegister.h"
+
+#include <Task.h>
+#include <TaskResult.h>
+
 #include "../networking/ControlMessageHeader.h"
-#include "../../../modules-sdk/Task.h"
-#include "../../../modules-sdk/TaskResult.h"
+#include "../modules-managing/ITaskDelegator.h"
+
 #include "TasksMap.h"
 
+#include "ITasksRegister.h"
+#include "IResultHandler.h"
 
-class TasksManager : public ITasksRegister {
+
+class TasksManager : public ITasksRegister, public IResultHandler{
 
 public:
     void addTask(ControlMessageHeader header, std::vector<std::byte> payload) override;
+    void handle(TaskResult taskResult) override;
 
+    void setTaskDelegator(const std::shared_ptr<ITaskDelegator> &taskDelegator);
 private:
 
     volatile bool run = true;
 
-
     TasksMap tasks;
+
+    std::shared_ptr<ITaskDelegator> taskDelegator;
 
 
     Task handleSingleMessage(const ControlMessageHeader& header, std::vector<std::byte> payload);

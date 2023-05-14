@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "ITaskDelegator.h"
-#include "../../../modules-sdk/TaskExecutor.h"
+#include <TaskExecutor.h>
 
 class ModulesManager : public ITaskDelegator{
 

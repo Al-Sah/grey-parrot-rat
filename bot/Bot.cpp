@@ -43,6 +43,7 @@ void Bot::handleSystemSignal(int signal) {
     Bot::run_cv.notify_one();
 }
 
+// TODO: make shared ??
 Bot *Bot::GetInstance() {
     if(bot == nullptr){
         bot = GENERATE_BOT_INSTANCE();
@@ -52,7 +53,9 @@ Bot *Bot::GetInstance() {
 
 int Bot::runPerpetual() {
 
-    Bot::GetInstance();
+    auto instance = Bot::GetInstance();
+
+    instance->modulesManager->registerModule(std::shared_ptr<TaskExecutor>(instance));
 
     auto result = pool.submit([](){bot->connectionsManager->start();});
 
@@ -62,7 +65,7 @@ int Bot::runPerpetual() {
     }
     std::cout << "exited main loop, stopping services\n";
 
-    bot->connectionsManager->stop();
+    instance->connectionsManager->stop();
     result.get();
 
     return 0;
@@ -70,6 +73,7 @@ int Bot::runPerpetual() {
 
 
 Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
+    TaskExecutor(ModuleInfo("bot-control", "0.0.0")),
     applicationDetails(),
     deviceDetails(infoCollector->getDeviceDetails()){
 
@@ -91,15 +95,44 @@ Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
             << std::endl;
 
     // setup services
-
     connectionsManager = std::make_shared<ConnectionsManager>(
             ConnectionsManagerConfiguration(deviceDetails.computerId)
             );
-
     tasksManager = std::make_shared<TasksManager>();
+    modulesManager = std::make_shared<ModulesManager>();
+
 
     // setup dependencies between services
+    //
+    // Task 'lifecycle':
+    // ConnectionsManager -> TasksManager -> ModulesManager -> module
+    // Task result 'lifecycle':
+    // module -> ModulesManager -> TasksManager -> ConnectionsManager
 
     connectionsManager->setTasksHandler(std::shared_ptr<ITasksRegister>(tasksManager.get()));
+    tasksManager->setTaskDelegator(std::shared_ptr<ITaskDelegator>(modulesManager.get()));
 
+
+    setCallback([this](TaskResult tr){
+        tasksManager->handle(tr);
+    });
+}
+
+void Bot::execute(Task task) {
+
+    std::vector<std::byte> payload {
+        std::byte{'d'},
+        std::byte{'a'},
+        std::byte{'t'},
+        std::byte{'a'},
+    };
+
+    TaskResult tr{
+        .isClosing = true,
+        .module_id = moduleInfo.id,
+        .task_id = task.task_id,
+        .payload = payload
+    };
+
+    callback(tr);
 }

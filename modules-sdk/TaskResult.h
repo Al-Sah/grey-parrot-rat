@@ -15,7 +15,7 @@ struct TaskResult {
     const bool isClosing;
 
     const std::string module_id;
-    const std::string task_id;
+    const std::uint64_t task_id;
 
     // payload can be represented in binary form or as file
     const std::optional<std::string> filepath;

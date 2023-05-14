@@ -6,7 +6,7 @@
 #define GREY_PARROT_CLIENTS_TASKSCREATOR_H
 
 
-#include "../../modules-sdk/Task.h"
+#include <Task.h>
 #include "networking/ControlMessageHeader.h"
 #include "tasks-managing/TasksManager.h"
 

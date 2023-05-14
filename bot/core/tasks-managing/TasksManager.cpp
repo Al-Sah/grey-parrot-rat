@@ -9,13 +9,14 @@
 
 void TasksManager::addTask(ControlMessageHeader header, std::vector<std::byte> payload) {
 
-    std::cout << "Received new task: " << header.getRequestId() << std::endl;
+    std::cout << "TasksManager: received request " << header.getRequestId()
+            << " for the " << header.getModuleId().value_or("?") << std::endl;
 
     switch (header.getMessageType()) {
 
         case ControlMessageHeader::MessageType::SINGLE: {
             Task task = handleSingleMessage(header, payload);
-            // TODO pass this to the modules manager
+            taskDelegator->delegate(task);
         }
             break;
         case ControlMessageHeader::MessageType::FIRST: {
@@ -32,6 +33,16 @@ void TasksManager::addTask(ControlMessageHeader header, std::vector<std::byte> p
             break;
     }
 
+}
+
+void TasksManager::handle(TaskResult taskResult) {
+    // TODO: pass it to the connections manager
+    std::cout << "Received result :\n"
+            << " | module: " << taskResult.module_id << std::endl
+            << " | task_id: " << taskResult.task_id << std::endl
+            << " | isClosing: " << taskResult.isClosing << std::endl
+            << " | as payload : " << taskResult.payload.has_value() << std::endl
+            << " | as file : " << taskResult.payload.has_value() << std::endl;
 }
 
 
@@ -85,4 +96,7 @@ std::optional<Task> TasksManager::handleContinuationMessage(
     return TasksCreator::mapPartial(ti, header, payload);
 }
 
+void TasksManager::setTaskDelegator(const std::shared_ptr<ITaskDelegator> &td) {
+    this->taskDelegator = td;
+}
 

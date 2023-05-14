@@ -16,6 +16,9 @@ include_directories(
         #${WEBSOCKETPP_INCLUDES}
         )
 
+add_subdirectory(../modules-sdk sdk)
+include_directories(../modules-sdk)
+
 
 set(BOT_COMMON_SOURCES
         main.cpp
@@ -29,9 +32,6 @@ set(BOT_COMMON_SOURCES
         core/tasks-managing/TasksMap.cpp
         core/TasksCreator.cpp
         core/modules-managing/ModulesManager.cpp
-
-        ../modules-sdk/Module.cpp
-        ../modules-sdk/TaskExecutor.cpp
         )
 
 
@@ -41,21 +41,20 @@ set(BOT_COMMON_HEADERS
         platform-info/DeviceDetails.h
         app-info/ApplicationDetails.h
 
+        core/TasksCreator.h
+
         core/networking/ConnectionsManager.h
         core/networking/ControlMessageHeader.h
         core/networking/ChannelState.h
         core/networking/C2ServerChannel.h
-        core/tasks-managing/TasksManager.h
-        ../modules-sdk/TaskResult.h
-        ../modules-sdk/Module.h
-        ../modules-sdk/TaskExecutor.h
-        ../modules-sdk/Task.h
+        core/networking/IMessagesSender.h
 
-        core/TasksCreator.h
+        core/tasks-managing/TasksManager.h
+        core/tasks-managing/IResultHandler.h
         core/tasks-managing/TasksMap.h
         core/tasks-managing/TaskInfo.h
-        core/modules-managing/ModulesManager.h
 
+        core/modules-managing/ModulesManager.h
         core/modules-managing/ITaskDelegator.h
         )
 
@@ -77,7 +76,7 @@ add_executable(gray-parrot-bot
         ${BOT_PLATFORM_DEPEND_HEADERS}
         )
 
-target_link_libraries(gray-parrot-bot libdatachannel)
+target_link_libraries(gray-parrot-bot gray-parrot-modules-sdk libdatachannel)
 
 add_dependencies(gray-parrot-bot sd-party-libdatachannel)
 add_dependencies(gray-parrot-bot sd-party-nlohmann-json)

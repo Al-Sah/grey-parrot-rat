@@ -5,7 +5,8 @@
 #ifndef GREY_PARROT_BOT_TASK_DELEGATOR_INTERFACE_H
 #define GREY_PARROT_BOT_TASK_DELEGATOR_INTERFACE_H
 
-#include "../../../modules-sdk/Task.h"
+
+#include <Task.h>
 
 /** @interface ITaskDelegator
  *

@@ -16,10 +16,11 @@
 #include "core/networking/ConnectionsManager.h"
 #include "core/BS_thread_pool.hpp"
 #include "core/tasks-managing/TasksManager.h"
+#include "core/modules-managing/ModulesManager.h"
 
-#include "../modules-sdk/Module.h"
+#include <TaskExecutor.h>
 
-class Bot {
+class Bot : public TaskExecutor {
 
 public:
     //singleton pattern
@@ -30,6 +31,9 @@ public:
     static int runPerpetual();
 
 private:
+
+    void execute(Task task) override;
+
     static volatile bool run;
     static std::mutex mutex;
     static std::condition_variable run_cv;
@@ -41,6 +45,7 @@ private:
 
     std::shared_ptr<ConnectionsManager> connectionsManager;
     std::shared_ptr<TasksManager> tasksManager;
+    std::shared_ptr<ModulesManager> modulesManager;
 
 
     DeviceDetails deviceDetails;

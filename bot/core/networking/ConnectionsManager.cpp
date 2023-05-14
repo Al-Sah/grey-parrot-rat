@@ -43,7 +43,6 @@ void ConnectionsManager::setTasksHandler(std::shared_ptr<ITasksRegister> tasksRe
 }
 
 void ConnectionsManager::handleC2ServerMessage(std::vector<std::byte> &data) {
-    std::cout << "c2Server channel received message";
     auto header = ControlMessageHeader(data);
 
     if(!header.isValid()){
