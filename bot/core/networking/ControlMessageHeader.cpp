@@ -2,34 +2,41 @@
 // Created by alsah on 03.04.23.
 //
 
+#include <bit> // std::endian
 #include <cstring>
 #include <iostream>
 #include "ControlMessageHeader.h"
 
-#include <endian.h>
 
+// be (big endian / network order) to host order (can be different)
+template <typename T> constexpr T be2h(T value) noexcept {
+    // probably always true
+    if constexpr (std::endian::native == std::endian::little){
+        char* ptr = reinterpret_cast<char*>(&value);
+        std::reverse(ptr, ptr + sizeof(T));
+    }
+    return value;
+}
 
 // Utils functions
 namespace parse{
 
-    static std::uint32_t get16uint(const std::byte* data){
+    static std::uint16_t get16uint(const std::byte* data){
         std::uint16_t res;
         std::memcpy(&res, data, sizeof(std::uint16_t));
-        return be16toh(res);
+        return be2h(res);
     }
     static std::uint32_t get32uint(const std::byte* data){
         std::uint32_t res;
         std::memcpy(&res, data, sizeof(std::uint32_t));
-        return be32toh(res);
+        return be2h(res);
     }
-    static std::uint32_t get64uint(const std::byte* data){
+    static std::uint64_t get64uint(const std::byte* data){
         std::uint64_t res;
         std::memcpy(&res, data, sizeof(std::uint64_t));
-        return be64toh(res);
+        return be2h(res);
     }
-
 }
-
 
 
 ControlMessageHeader::ControlMessageHeader(const std::vector<std::byte>& message) {
