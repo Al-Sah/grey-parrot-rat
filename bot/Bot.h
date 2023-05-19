@@ -20,6 +20,9 @@
 
 #include <TaskExecutor.h>
 
+#include <nlohmann/json.hpp>
+
+
 class Bot : public TaskExecutor {
 
 public:
@@ -52,6 +55,8 @@ private:
     ApplicationDetails applicationDetails;
 
     static void handleSystemSignal(int signal);
+
+    static void to_json(nlohmann::json& json, const Bot& bot);
 };
 
 

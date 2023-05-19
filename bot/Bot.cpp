@@ -7,6 +7,7 @@
 #include <iostream>
 #include <csignal>
 #include <thread>
+#include <utility>
 
 #if defined(PLATFORM_IS_LINUX)
     #include "platform-info/collectors/LinuxInfoCollector.h"
@@ -17,6 +18,20 @@
 #else
     #error "platform is not supported"
 #endif
+
+using Json = nlohmann::json;
+
+std::vector<std::byte> getBytes(std::string const &s)
+{
+    std::vector<std::byte> bytes;
+    bytes.reserve(s.size());
+
+    std::transform(std::begin(s), std::end(s), std::back_inserter(bytes), [](char c){
+        return std::byte(c);
+    });
+
+    return bytes;
+}
 
 
 // Initialization of static fields
@@ -111,28 +126,68 @@ Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
 
     connectionsManager->setTasksHandler(std::shared_ptr<ITasksRegister>(tasksManager.get()));
     tasksManager->setTaskDelegator(std::shared_ptr<ITaskDelegator>(modulesManager.get()));
+    tasksManager->setMessagesSender(std::shared_ptr<IMessagesSender>(connectionsManager.get()));
 
 
     setCallback([this](TaskResult tr){
-        tasksManager->handle(tr);
+        tasksManager->handle(std::move(tr));
     });
 }
 
 void Bot::execute(Task task) {
 
-    std::vector<std::byte> payload {
-        std::byte{'d'},
-        std::byte{'a'},
-        std::byte{'t'},
-        std::byte{'a'},
-    };
+    if(! task.payload.has_value()){
+        return;
+    }
+
+    // convert std::vector<std::byte> to std::string
+    auto str_payload = std::string(
+            reinterpret_cast<const char*>(task.payload.value().data()),
+            task.payload.value().size()
+            );
+
+    if(str_payload != "get-state"){
+        std::cout << "Bot: Undefined command";
+        return;
+    }
+
+    Json json{};
+
+    to_json(json, *this);
+    std::string result = to_string(json);
+
+    std::cout << result;
 
     TaskResult tr{
         .isClosing = true,
         .module_id = moduleInfo.id,
         .task_id = task.task_id,
-        .payload = payload
+        .payload = getBytes(result)
     };
 
     callback(tr);
+}
+
+
+void Bot::to_json(Json &aJson, const Bot &aBot) {
+
+    Json modules_as_json {};
+    for (const auto &item: aBot.modulesManager->getModulesInfo()){
+        modules_as_json.push_back(item.id + ' ' + item.version);
+    }
+    aJson = nlohmann::json{
+        "app", {
+            { "isRoot", aBot.applicationDetails.isRoot },
+            { "startTime", aBot.applicationDetails.startTime },
+            { "version", aBot.applicationDetails.botVersion },
+            { "c4platform", aBot.applicationDetails.compiledFor },
+            { "c4arc", aBot.applicationDetails.compiledForArc }
+        },
+        "device", {
+            { "id", aBot.deviceDetails.computerId },
+            { "name", aBot.deviceDetails.computerName },
+            { "os", aBot.deviceDetails.osFullName }
+        },
+        "modules", modules_as_json
+    };
 }

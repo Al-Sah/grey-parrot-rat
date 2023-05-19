@@ -17,8 +17,7 @@ class TaskExecutor{
 public:
     virtual void execute(Task task) = 0;
 
-    [[nodiscard]] std::string getModuleId() const;
-    [[nodiscard]] std::string getModuleVersion() const;
+    [[nodiscard]] ModuleInfo getModuleInfo() const;
 
     explicit TaskExecutor(ModuleInfo aModuleInfo);
     TaskExecutor( ModuleInfo aModuleInfo, const std::function<void(TaskResult)>& callback);

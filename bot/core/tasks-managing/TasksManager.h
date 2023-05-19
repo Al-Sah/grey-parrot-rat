@@ -20,6 +20,7 @@
 
 #include "ITasksRegister.h"
 #include "IResultHandler.h"
+#include "../networking/IMessagesSender.h"
 
 
 class TasksManager : public ITasksRegister, public IResultHandler{
@@ -29,6 +30,7 @@ public:
     void handle(TaskResult taskResult) override;
 
     void setTaskDelegator(const std::shared_ptr<ITaskDelegator> &taskDelegator);
+    void setMessagesSender(const std::shared_ptr<IMessagesSender> &messagesSender);
 private:
 
     volatile bool run = true;
@@ -36,6 +38,7 @@ private:
     TasksMap tasks;
 
     std::shared_ptr<ITaskDelegator> taskDelegator;
+    std::shared_ptr<IMessagesSender> messagesSender;
 
 
     Task handleSingleMessage(const ControlMessageHeader& header, std::vector<std::byte> payload);

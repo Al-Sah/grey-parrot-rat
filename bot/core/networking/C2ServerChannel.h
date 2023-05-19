@@ -74,6 +74,9 @@ public:
     void close(const std::string& reason = "");
 
 
+    void send(const std::vector<std::byte>& data);
+
+
 
     C2ServerChannel(C2ServerChannel&) = delete;
     C2ServerChannel(const C2ServerChannel&) = delete;

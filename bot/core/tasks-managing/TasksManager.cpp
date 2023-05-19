@@ -20,7 +20,6 @@ void TasksManager::addTask(ControlMessageHeader header, std::vector<std::byte> p
         }
             break;
         case ControlMessageHeader::MessageType::FIRST: {
-
             // TODO pass this to the modules manager
         }
             break;
@@ -36,7 +35,14 @@ void TasksManager::addTask(ControlMessageHeader header, std::vector<std::byte> p
 }
 
 void TasksManager::handle(TaskResult taskResult) {
-    // TODO: pass it to the connections manager
+
+    if(taskResult.isClosing){
+        tasks.deleteTaskInfo(taskResult.task_id);
+    }
+    // TODO: create response header
+    messagesSender->sendResult(taskResult.payload.value());
+
+    // TODO: delete it ....
     std::cout << "Received result :\n"
             << " | module: " << taskResult.module_id << std::endl
             << " | task_id: " << taskResult.task_id << std::endl
@@ -98,5 +104,9 @@ std::optional<Task> TasksManager::handleContinuationMessage(
 
 void TasksManager::setTaskDelegator(const std::shared_ptr<ITaskDelegator> &td) {
     this->taskDelegator = td;
+}
+
+void TasksManager::setMessagesSender(const std::shared_ptr<IMessagesSender> &aMessagesSender) {
+    TasksManager::messagesSender = aMessagesSender;
 }
 

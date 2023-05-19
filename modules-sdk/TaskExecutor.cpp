@@ -15,10 +15,6 @@ void TaskExecutor::setCallback(const std::function<void(TaskResult)> &aCallback)
     TaskExecutor::callback = aCallback;
 }
 
-std::string TaskExecutor::getModuleVersion() const {
-    return this->moduleInfo.version;
-}
-
-std::string TaskExecutor::getModuleId() const {
-    return this->moduleInfo.id;
+ModuleInfo TaskExecutor::getModuleInfo() const {
+    return moduleInfo;
 }

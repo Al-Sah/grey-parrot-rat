@@ -10,6 +10,7 @@
 
 #include "C2ServerChannel.h"
 #include "../tasks-managing/ITasksRegister.h"
+#include "IMessagesSender.h"
 
 
 struct ConnectionsManagerConfiguration {
@@ -24,7 +25,7 @@ struct ConnectionsManagerConfiguration {
 };
 
 
-class ConnectionsManager {
+class ConnectionsManager : public IMessagesSender{
 
 
 public:
@@ -39,6 +40,7 @@ public:
     void operator = (const ConnectionsManager&) = delete;
     void operator = (ConnectionsManager) = delete;
 
+    void sendResult(std::vector<std::byte> payload) override;
 
     void start();
     void stop();

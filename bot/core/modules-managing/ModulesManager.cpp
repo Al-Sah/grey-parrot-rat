@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <list>
 #include "ModulesManager.h"
 
 void ModulesManager::delegate(Task task) {
@@ -21,5 +22,15 @@ void ModulesManager::delegate(Task task) {
 }
 
 void ModulesManager::registerModule(const std::shared_ptr<TaskExecutor>& taskExecutor) {
-    modules.emplace(taskExecutor->getModuleId(), taskExecutor);
+    modules.emplace(taskExecutor->getModuleInfo().id, taskExecutor);
+}
+
+std::list<ModuleInfo> ModulesManager::getModulesInfo() const {
+    auto result = std::list<ModuleInfo>();
+
+    for (const auto &item: modules){
+        result.emplace_back(item.second->getModuleInfo());
+    }
+
+    return result;
 }

@@ -128,6 +128,10 @@ C2ServerChannel::C2ServerChannel(C2ServerChannelConfiguration config) : config(s
     opened = false;
 }
 
+void C2ServerChannel::send(const std::vector<std::byte>& data) {
+    ws->send(data.data(), data.size());
+}
+
 
 C2ServerChannelConfiguration::C2ServerChannelConfiguration(
         const std::function<void()> &onClosed,

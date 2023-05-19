@@ -21,6 +21,8 @@ public:
     void delegate(Task task) override;
 
     void registerModule(const std::shared_ptr<TaskExecutor>& taskExecutor);
+
+    [[nodiscard]] std::list<ModuleInfo> getModulesInfo() const;
 };
 
 
