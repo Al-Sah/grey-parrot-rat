@@ -9,6 +9,8 @@
 #include <thread>
 #include <utility>
 
+#include <messages.pb.h>
+
 #if defined(PLATFORM_IS_LINUX)
     #include "platform-info/collectors/LinuxInfoCollector.h"
     #define GENERATE_BOT_INSTANCE()new Bot(std::unique_ptr<IDeviceDetailsCollector>(new LinuxInfoCollector()))
@@ -18,8 +20,6 @@
 #else
     #error "platform is not supported"
 #endif
-
-using Json = nlohmann::json;
 
 std::vector<std::byte> getBytes(std::string const &s)
 {
@@ -151,43 +151,41 @@ void Bot::execute(Task task) {
         return;
     }
 
-    Json json{};
-
-    to_json(json, *this);
-    std::string result = to_string(json);
-
-    std::cout << result;
+    auto message = to_proto_message();
+    std::string buffer = message.SerializeAsString();
 
     TaskResult tr{
         .isClosing = true,
         .module_id = moduleInfo.id,
         .task_id = task.task_id,
-        .payload = getBytes(result)
+        .payload = getBytes(buffer)
     };
 
     callback(tr);
 }
 
 
-void Bot::to_json(Json &aJson, const Bot &aBot) {
+msgs::AgentDescription Bot::to_proto_message() {
 
-    Json modules_as_json {};
-    for (const auto &item: aBot.modulesManager->getModulesInfo()){
-        modules_as_json.push_back(item.id + ' ' + item.version);
+    msgs::AgentDescription agentDescription{};
+
+    msgs::AppInfo *appInfo = agentDescription.mutable_app();
+    msgs::DeviceInfo *deviceInfo = agentDescription.mutable_device();
+
+    deviceInfo->set_id(deviceDetails.computerId);
+    deviceInfo->set_name(deviceDetails.computerName);
+    deviceInfo->set_os(deviceDetails.osFullName);
+
+    appInfo->set_root(applicationDetails.isRoot);
+    appInfo->set_start(applicationDetails.startTime);
+    appInfo->set_version(applicationDetails.botVersion);
+    appInfo->set_c4platform(applicationDetails.compiledFor);
+    appInfo->set_c4arc(std::to_string(applicationDetails.compiledForArc));
+
+    for (const auto &item: modulesManager->getModulesInfo()){
+        auto moduleInfoPrt = appInfo->add_modules();
+        moduleInfoPrt->set_name(item.id);
+        moduleInfoPrt->set_version(item.version);
     }
-    aJson = nlohmann::json{
-        "app", {
-            { "isRoot", aBot.applicationDetails.isRoot },
-            { "startTime", aBot.applicationDetails.startTime },
-            { "version", aBot.applicationDetails.botVersion },
-            { "c4platform", aBot.applicationDetails.compiledFor },
-            { "c4arc", aBot.applicationDetails.compiledForArc }
-        },
-        "device", {
-            { "id", aBot.deviceDetails.computerId },
-            { "name", aBot.deviceDetails.computerName },
-            { "os", aBot.deviceDetails.osFullName }
-        },
-        "modules", modules_as_json
-    };
+    return agentDescription;
 }

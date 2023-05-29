@@ -17,6 +17,7 @@
 #include "core/BS_thread_pool.hpp"
 #include "core/tasks-managing/TasksManager.h"
 #include "core/modules-managing/ModulesManager.h"
+#include "messages.pb.h"
 
 #include <TaskExecutor.h>
 
@@ -56,7 +57,7 @@ private:
 
     static void handleSystemSignal(int signal);
 
-    static void to_json(nlohmann::json& json, const Bot& bot);
+    msgs::AgentDescription to_proto_message();
 };
 
 

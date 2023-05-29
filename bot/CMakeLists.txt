@@ -19,6 +19,9 @@ include_directories(
 add_subdirectory(../modules-sdk sdk)
 include_directories(../modules-sdk)
 
+get_target_property(core_msgs_includes core-msgs INCLUDE_DIRECTORIES)
+include_directories(${core_msgs_includes})
+
 
 set(BOT_COMMON_SOURCES
         main.cpp
@@ -76,7 +79,7 @@ add_executable(gray-parrot-bot
         ${BOT_PLATFORM_DEPEND_HEADERS}
         )
 
-target_link_libraries(gray-parrot-bot gray-parrot-modules-sdk libdatachannel)
+target_link_libraries(gray-parrot-bot gray-parrot-modules-sdk libdatachannel core-msgs)
 
 add_dependencies(gray-parrot-bot sd-party-libdatachannel)
 add_dependencies(gray-parrot-bot sd-party-nlohmann-json)
