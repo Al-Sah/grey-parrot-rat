@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package msgs;
+option java_package = " alxdev.c2server.models.proto";
+
+message AppInfo{
+
+  bool root = 1;
+  uint64 start = 2;
+  repeated ModuleInfo modules = 3;
+
+  string version = 4;
+  string c4platform = 5;
+  string c4arc = 6;
+}
+
+message ModuleInfo{
+  string name = 1;
+  string version = 2;
+}
+
+message DeviceInfo{
+  string id = 1;
+  string name = 2;
+  string os = 4;
+}
+
+message AgentDescription {
+  AppInfo app = 1;
+  DeviceInfo device = 2;
+}
+
+
+message ActiveAgents{
+  repeated AgentDescription data = 1;
+}

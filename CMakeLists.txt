@@ -14,6 +14,7 @@ include(cmake/manage-3d-parties.cmake)
 get_libdatachannel_project()
 get_nlohmann_json_project()
 
+add_subdirectory(core-msgs)
 
 if(BUILD_BOT_APP)
     add_subdirectory(bot)
