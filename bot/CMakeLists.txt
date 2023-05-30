@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.22)
 
 project(gray-parrot-bot VERSION 0.0.1 LANGUAGES CXX)
 

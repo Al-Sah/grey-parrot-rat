@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.22)
 
 project(grey-parrot-clients
         DESCRIPTION "Additional project to build all cpp clients"
