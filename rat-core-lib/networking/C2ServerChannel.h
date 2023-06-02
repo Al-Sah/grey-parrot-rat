@@ -2,10 +2,10 @@
 // Created by alsah on 05.04.23.
 //
 
-#ifndef GREY_PARROT_BOT_C2SERVER_CHANNEL_H
-#define GREY_PARROT_BOT_C2SERVER_CHANNEL_H
+#ifndef GREY_PARROT_RAT_CORE_C2SERVER_CHANNEL_H
+#define GREY_PARROT_RAT_CORE_C2SERVER_CHANNEL_H
 
-#include <rtc/rtc.hpp>
+#include "rtc/rtc.hpp"
 #include <memory>
 #include <future>
 #include <variant>
@@ -60,12 +60,11 @@ public:
      *
      * @see C2ServerChannelConfiguration::sleepToRecover
      *
-     * @param server - server address as "IPv4:port"
-     * @param path - optional, additional path
+     * @param url - url
      * @param recover - recover after failure
      * @return true if connection opened successfully, false otherwise
      */
-    bool open(const std::string& server, const std::string& path, bool recover);
+    bool open(const std::string& url, bool recover);
 
     /**
      * Close opened connection or stop recover process
@@ -73,10 +72,11 @@ public:
      */
     void close(const std::string& reason = "");
 
-
+    /**
+     * Send message to c2server
+     * @param data serialized binary data
+     */
     void send(const std::vector<std::byte>& data);
-
-
 
     C2ServerChannel(C2ServerChannel&) = delete;
     C2ServerChannel(const C2ServerChannel&) = delete;
@@ -124,4 +124,4 @@ private:
     void recoverConnection();
 };
 
-#endif //GREY_PARROT_BOT_C2SERVER_CHANNEL_H
+#endif //GREY_PARROT_RAT_CORE_C2SERVER_CHANNEL_H

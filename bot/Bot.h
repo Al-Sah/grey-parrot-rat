@@ -13,15 +13,17 @@
 #include "platform-info/DeviceDetails.h"
 #include "app-info/ApplicationDetails.h"
 
-#include "core/networking/ConnectionsManager.h"
-#include "core/BS_thread_pool.hpp"
-#include "core/tasks-managing/TasksManager.h"
-#include "core/modules-managing/ModulesManager.h"
-#include "messages.pb.h"
+#include "core-data.pb.h"
+
+#include "BS_thread_pool.hpp"
+
+#include "tasks-managing/TasksManagerBase.h"
+#include "networking/ConnectionsManager.h"
+#include "core/AgentModulesManager.h"
+#include "core/AgentTasksManager.h"
 
 #include <TaskExecutor.h>
 
-#include <nlohmann/json.hpp>
 
 
 class Bot : public TaskExecutor {
@@ -48,8 +50,8 @@ private:
     explicit Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector);
 
     std::shared_ptr<ConnectionsManager> connectionsManager;
-    std::shared_ptr<TasksManager> tasksManager;
-    std::shared_ptr<ModulesManager> modulesManager;
+    std::shared_ptr<AgentTasksManager> tasksManager;
+    std::shared_ptr<AgentModulesManager> modulesManager;
 
 
     DeviceDetails deviceDetails;

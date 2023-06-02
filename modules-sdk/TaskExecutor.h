@@ -2,14 +2,13 @@
 // Created by alsah on 10.05.23.
 //
 
-#ifndef GREY_PARROT_SDK_TASK_EXECUTOR_INTERFACE_H
-#define GREY_PARROT_SDK_TASK_EXECUTOR_INTERFACE_H
+#ifndef GREY_PARROT_RAT_SDK_TASK_EXECUTOR_H
+#define GREY_PARROT_RAT_SDK_TASK_EXECUTOR_H
 
 #include <utility>
 #include <functional>
 
 #include "Task.h"
-#include "TaskResult.h"
 #include "ModuleInfo.h"
 
 class TaskExecutor{
@@ -20,14 +19,14 @@ public:
     [[nodiscard]] ModuleInfo getModuleInfo() const;
 
     explicit TaskExecutor(ModuleInfo aModuleInfo);
-    TaskExecutor( ModuleInfo aModuleInfo, const std::function<void(TaskResult)>& callback);
+    TaskExecutor( ModuleInfo aModuleInfo, const std::function<void(Task)>& callback);
 
-    void setCallback(const std::function<void(TaskResult)> &aCallback);
+    void setCallback(const std::function<void(Task)> &aCallback);
 
 protected:
     const ModuleInfo moduleInfo;
-    std::function<void(TaskResult)> callback;
+    std::function<void(Task)> callback;
 };
 
 
-#endif //GREY_PARROT_SDK_TASK_EXECUTOR_INTERFACE_H
+#endif //GREY_PARROT_SDK_TASK_EXECUTOR_H

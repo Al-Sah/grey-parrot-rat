@@ -7,11 +7,11 @@
 TaskExecutor::TaskExecutor(ModuleInfo aModuleInfo):
         moduleInfo(std::move(aModuleInfo)){}
 
-TaskExecutor::TaskExecutor(ModuleInfo aModuleInfo, const std::function<void(TaskResult)> &callback):
+TaskExecutor::TaskExecutor(ModuleInfo aModuleInfo, const std::function<void(Task)> &callback):
         moduleInfo(std::move(aModuleInfo)),
         callback(callback){}
 
-void TaskExecutor::setCallback(const std::function<void(TaskResult)> &aCallback) {
+void TaskExecutor::setCallback(const std::function<void(Task)> &aCallback) {
     TaskExecutor::callback = aCallback;
 }
 

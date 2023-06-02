@@ -2,8 +2,8 @@
 // Created by alsah on 14.05.23.
 //
 
-#ifndef GREY_PARROT_SDK_MODULE_INFO_H
-#define GREY_PARROT_SDK_MODULE_INFO_H
+#ifndef GREY_PARROT_RAT_SDK_MODULE_INFO_H
+#define GREY_PARROT_RAT_SDK_MODULE_INFO_H
 
 
 #include <string>
@@ -18,4 +18,4 @@ struct ModuleInfo{
         version(std::move(aVersion)){}
 };
 
-#endif //GREY_PARROT_SDK_MODULE_INFO_H
+#endif //GREY_PARROT_RAT_SDK_MODULE_INFO_H

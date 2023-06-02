@@ -22,7 +22,7 @@ message ModuleInfo{
 message DeviceInfo{
   string id = 1;
   string name = 2;
-  string os = 4;
+  string os = 3;
 }
 
 message AgentDescription {

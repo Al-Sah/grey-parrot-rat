@@ -7,22 +7,24 @@
 
 #include <map>
 #include <memory>
+#include <list>
 
-#include "ITaskDelegator.h"
-#include <TaskExecutor.h>
 
-class ModulesManager : public ITaskDelegator{
+#include "TaskExecutor.h"
+#include "ITaskHandler.h"
+
+class AgentModulesManager : public ITaskHandler{
 
 private:
 
     std::map<std::string, std::shared_ptr<TaskExecutor>> modules;
 
 public:
-    void delegate(Task task) override;
+    bool handle(Task data) override;
 
     void registerModule(const std::shared_ptr<TaskExecutor>& taskExecutor);
 
-    [[nodiscard]] std::list<ModuleInfo> getModulesInfo() const;
+    [[nodiscard]] std::list<ModuleInfo> getExecutorsInfo() const;
 };
 
 

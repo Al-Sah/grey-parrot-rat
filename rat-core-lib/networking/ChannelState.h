@@ -2,8 +2,8 @@
 // Created by alsah on 02.04.23.
 //
 
-#ifndef GREY_PARROT_BOT_CHANNEL_STATE_H
-#define GREY_PARROT_BOT_CHANNEL_STATE_H
+#ifndef GREY_PARROT_RAT_CORE_CHANNEL_STATE_H
+#define GREY_PARROT_RAT_CORE_CHANNEL_STATE_H
 
 
 #include <cstdint>
@@ -32,4 +32,4 @@ enum class ChannelState : std::uint16_t {
 };
 
 
-#endif //GREY_PARROT_BOT_CHANNEL_STATE_H
+#endif //GREY_PARROT_RAT_CORE_CHANNEL_STATE_H

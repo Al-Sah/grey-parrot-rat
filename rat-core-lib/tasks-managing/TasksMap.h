@@ -2,8 +2,8 @@
 // Created by alsah on 13.05.23.
 //
 
-#ifndef GREY_PARROT_CLIENTS_TASKSMAP_H
-#define GREY_PARROT_CLIENTS_TASKSMAP_H
+#ifndef GREY_PARROT_RAT_CORE_TASKS_MAP_H
+#define GREY_PARROT_RAT_CORE_TASKS_MAP_H
 
 
 #include <cstdint>
@@ -29,11 +29,11 @@ public:
     // Basic CRUD operation
 
     void addTaskInfo(const TaskInfo& ti);
-    TaskInfo addTaskInfo(std::uint64_t id, std::string module_id, bool toAccumulate);
+    TaskInfo addTaskInfo(std::uint64_t id, std::string module_id);
     void deleteTaskInfo(std::uint64_t id);
     void changeTaskState(std::uint64_t id, TaskInfo::TaskState newState);
     TaskInfo getTaskInfo(std::uint64_t id);
 };
 
 
-#endif //GREY_PARROT_CLIENTS_TASKSMAP_H
+#endif //GREY_PARROT_RAT_CORE_TASKS_MAP_H

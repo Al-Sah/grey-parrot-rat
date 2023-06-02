@@ -5,13 +5,13 @@
 #include "C2ServerChannel.h"
 
 #include <utility>
+#include <iostream>
 
 
-
-bool C2ServerChannel::open(const std::string& server, const std::string& path, bool recover) {
+bool C2ServerChannel::open(const std::string& urlParam, bool recover) {
 
     run = true;
-    url = "ws://" + server + path;
+    url = urlParam;
 
     if(!recover){
         return tryToOpen();

@@ -9,18 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 configure_file(app-info/bot-version.h.in bot-version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# sd-party libs
-include_directories(
-        ${LIBDATACHANNEL_INCLUDES}
-        ${NLOHMANN_JSON_INCLUDES}
-        #${WEBSOCKETPP_INCLUDES}
-        )
-
-add_subdirectory(../modules-sdk sdk)
-include_directories(../modules-sdk)
-
-get_target_property(core_msgs_includes core-msgs INCLUDE_DIRECTORIES)
-include_directories(${core_msgs_includes})
+get_target_property(core_lib_includes core-lib INCLUDE_DIRECTORIES)
+message(STATUS "core_lib_includes ${core_lib_includes}")
+include_directories(${core_lib_includes})
 
 
 set(BOT_COMMON_SOURCES
@@ -28,13 +19,8 @@ set(BOT_COMMON_SOURCES
         Bot.cpp
         app-info/ApplicationDetails.cpp
 
-        core/networking/ConnectionsManager.cpp
-        core/networking/ControlMessageHeader.cpp
-        core/networking/C2ServerChannel.cpp
-        core/tasks-managing/TasksManager.cpp
-        core/tasks-managing/TasksMap.cpp
-        core/TasksCreator.cpp
-        core/modules-managing/ModulesManager.cpp
+        core/AgentModulesManager.cpp
+        core/AgentTasksManager.cpp
         )
 
 
@@ -44,21 +30,8 @@ set(BOT_COMMON_HEADERS
         platform-info/DeviceDetails.h
         app-info/ApplicationDetails.h
 
-        core/TasksCreator.h
-
-        core/networking/ConnectionsManager.h
-        core/networking/ControlMessageHeader.h
-        core/networking/ChannelState.h
-        core/networking/C2ServerChannel.h
-        core/networking/IMessagesSender.h
-
-        core/tasks-managing/TasksManager.h
-        core/tasks-managing/IResultHandler.h
-        core/tasks-managing/TasksMap.h
-        core/tasks-managing/TaskInfo.h
-
-        core/modules-managing/ModulesManager.h
-        core/modules-managing/ITaskDelegator.h
+        core/AgentModulesManager.h
+        core/AgentTasksManager.h
         )
 
 
@@ -79,8 +52,4 @@ add_executable(gray-parrot-bot
         ${BOT_PLATFORM_DEPEND_HEADERS}
         )
 
-target_link_libraries(gray-parrot-bot gray-parrot-modules-sdk libdatachannel core-msgs)
-
-add_dependencies(gray-parrot-bot sd-party-libdatachannel)
-add_dependencies(gray-parrot-bot sd-party-nlohmann-json)
-#add_dependencies(gray-parrot-bot sd-party-websocketpp)
+target_link_libraries(gray-parrot-bot core-lib)

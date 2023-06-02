@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package msgs;
+option java_package = " alxdev.c2server.models.proto";
+
+message ControlHeader{
+
+  MessageType type = 1;
+  uint64 requestId = 2;
+
+  // optional fields
+  bool isClosing = 3;      // used just in the response
+  string module = 4;       // module identifier (name)
+  uint64 payloadSize = 5;  // full size of payload
+  uint32 partition = 6;    // current part
+  uint32 parts = 7;        // number of parts
+
+  bool error = 8;
+
+  enum MessageType {
+    SINGLE = 0;
+    FIRST = 1;
+    NEXT = 3;
+    LAST = 4;
+  }
+}
+
+message ControlPacket{
+  ControlHeader header = 1;
+  bytes payload = 2;
+}
+
+message SignalingData{
+  //TODO
+}
+
+message NetworkMessage{
+  oneof data {
+    ControlPacket control = 1;
+    SignalingData signaling = 2;
+  }
+}

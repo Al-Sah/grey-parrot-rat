@@ -9,10 +9,14 @@
 #include <thread>
 #include <utility>
 
-#include <messages.pb.h>
+#include <core-data.pb.h>
+#include "networking/ConnectionsManager.h"
+#include "tasks-managing/TasksManagerBase.h"
 
 #if defined(PLATFORM_IS_LINUX)
     #include "platform-info/collectors/LinuxInfoCollector.h"
+#include "core/AgentTasksManager.h"
+
     #define GENERATE_BOT_INSTANCE()new Bot(std::unique_ptr<IDeviceDetailsCollector>(new LinuxInfoCollector()))
 #elif defined(PLATFORM_IS_WINDOWS)
     #include "platform-info/collectors/WinInfoCollector.h"
@@ -20,18 +24,6 @@
 #else
     #error "platform is not supported"
 #endif
-
-std::vector<std::byte> getBytes(std::string const &s)
-{
-    std::vector<std::byte> bytes;
-    bytes.reserve(s.size());
-
-    std::transform(std::begin(s), std::end(s), std::back_inserter(bytes), [](char c){
-        return std::byte(c);
-    });
-
-    return bytes;
-}
 
 
 // Initialization of static fields
@@ -72,7 +64,7 @@ int Bot::runPerpetual() {
 
     instance->modulesManager->registerModule(std::shared_ptr<TaskExecutor>(instance));
 
-    auto result = pool.submit([](){bot->connectionsManager->start();});
+    auto result = pool.submit([](){bot->connectionsManager->start("localhost:8080");});
 
     while (Bot::run){
         std::unique_lock<std::mutex> lock(Bot::mutex);
@@ -111,54 +103,47 @@ Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
 
     // setup services
     connectionsManager = std::make_shared<ConnectionsManager>(
-            ConnectionsManagerConfiguration(deviceDetails.computerId)
+            ConnectionConfig(deviceDetails.computerId, "bot")
             );
-    tasksManager = std::make_shared<TasksManager>();
-    modulesManager = std::make_shared<ModulesManager>();
+
+    tasksManager = std::make_shared<AgentTasksManager>();
+    modulesManager = std::make_shared<AgentModulesManager>();
 
 
     // setup dependencies between services
     //
     // Task 'lifecycle':
-    // ConnectionsManager -> TasksManager -> ModulesManager -> module
+    // ConnectionsManager -> TasksManagerBase -> TaskExecutorsManager -> module
     // Task result 'lifecycle':
-    // module -> ModulesManager -> TasksManager -> ConnectionsManager
+    // module -> TaskExecutorsManager -> TasksManagerBase -> ConnectionsManager
 
-    connectionsManager->setTasksHandler(std::shared_ptr<ITasksRegister>(tasksManager.get()));
-    tasksManager->setTaskDelegator(std::shared_ptr<ITaskDelegator>(modulesManager.get()));
-    tasksManager->setMessagesSender(std::shared_ptr<IMessagesSender>(connectionsManager.get()));
+    connectionsManager->setTasksHandler(std::shared_ptr<IControlPacketHandler>(tasksManager.get()));
+    tasksManager->setTaskHandler(std::shared_ptr<ITaskHandler>(modulesManager.get()));
+    tasksManager->setMessagesSender(std::shared_ptr<IControlPacketSender>(connectionsManager.get()));
 
 
-    setCallback([this](TaskResult tr){
+    setCallback([this](Task tr){
         tasksManager->handle(std::move(tr));
     });
 }
 
 void Bot::execute(Task task) {
 
-    if(! task.payload.has_value()){
-        return;
-    }
-
-    // convert std::vector<std::byte> to std::string
-    auto str_payload = std::string(
-            reinterpret_cast<const char*>(task.payload.value().data()),
-            task.payload.value().size()
-            );
-
-    if(str_payload != "get-state"){
+    if(get<std::string>(task.payload) != "get-state"){
         std::cout << "Bot: Undefined command";
+        // TODO send notification
         return;
     }
 
     auto message = to_proto_message();
-    std::string buffer = message.SerializeAsString();
 
-    TaskResult tr{
+    Task tr{
+        .id = task.id,
+        .module = moduleInfo.id,
+        .payload = message.SerializeAsString(),
+        .isFilepath = false,
         .isClosing = true,
-        .module_id = moduleInfo.id,
-        .task_id = task.task_id,
-        .payload = getBytes(buffer)
+        .isPartial = false
     };
 
     callback(tr);
@@ -182,7 +167,7 @@ msgs::AgentDescription Bot::to_proto_message() {
     appInfo->set_c4platform(applicationDetails.compiledFor);
     appInfo->set_c4arc(std::to_string(applicationDetails.compiledForArc));
 
-    for (const auto &item: modulesManager->getModulesInfo()){
+    for (const auto &item: modulesManager->getExecutorsInfo()){
         auto moduleInfoPrt = appInfo->add_modules();
         moduleInfoPrt->set_name(item.id);
         moduleInfoPrt->set_version(item.version);
