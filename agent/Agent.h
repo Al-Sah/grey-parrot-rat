@@ -2,8 +2,8 @@
 // Created by alsah on 11.03.23.
 //
 
-#ifndef GREY_PARROT_BOT_H
-#define GREY_PARROT_BOT_H
+#ifndef GREY_PARROT_AGENT_H
+#define GREY_PARROT_AGENT_H
 
 #include <string>
 #include <memory>
@@ -26,14 +26,14 @@
 
 
 
-class Bot : public TaskExecutor {
+class Agent : public TaskExecutor {
 
 public:
     //singleton pattern
-    Bot(Bot &other) = delete;
-    void operator=(const Bot &) = delete;
+    Agent(Agent &other) = delete;
+    void operator=(const Agent &) = delete;
 
-    static Bot *GetInstance();
+    static Agent *GetInstance();
     static int runPerpetual();
 
 private:
@@ -46,8 +46,8 @@ private:
 
     static BS::thread_pool pool;
 
-    static Bot* bot;
-    explicit Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector);
+    static Agent* bot;
+    explicit Agent(std::unique_ptr<IDeviceDetailsCollector> infoCollector);
 
     std::shared_ptr<ConnectionsManager> connectionsManager;
     std::shared_ptr<AgentTasksManager> tasksManager;
@@ -63,4 +63,4 @@ private:
 };
 
 
-#endif //GREY_PARROT_BOT_H
+#endif //GREY_PARROT_AGENT_H

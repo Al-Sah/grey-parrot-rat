@@ -2,8 +2,8 @@
 // Created by alsah on 13.05.23.
 //
 
-#ifndef GREY_PARROT_BOT_MODULES_MANAGER_H
-#define GREY_PARROT_BOT_MODULES_MANAGER_H
+#ifndef GREY_PARROT_AGENT_MODULES_MANAGER_H
+#define GREY_PARROT_AGENT_MODULES_MANAGER_H
 
 #include <map>
 #include <memory>
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif //GREY_PARROT_BOT_MODULES_MANAGER_H
+#endif //GREY_PARROT_AGENT_MODULES_MANAGER_H

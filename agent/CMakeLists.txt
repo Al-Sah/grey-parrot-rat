@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(gray-parrot-bot VERSION 0.0.1 LANGUAGES CXX)
+project(agent VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-configure_file(app-info/bot-version.h.in bot-version.h)
+configure_file(app-info/agent-version.h.in agent-version.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 get_target_property(core_lib_includes core-lib INCLUDE_DIRECTORIES)
@@ -16,7 +16,7 @@ include_directories(${core_lib_includes})
 
 set(BOT_COMMON_SOURCES
         main.cpp
-        Bot.cpp
+        Agent.cpp
         app-info/ApplicationDetails.cpp
 
         core/AgentModulesManager.cpp
@@ -25,7 +25,7 @@ set(BOT_COMMON_SOURCES
 
 
 set(BOT_COMMON_HEADERS
-        Bot.h
+        Agent.h
         app-info/platform.h
         platform-info/DeviceDetails.h
         app-info/ApplicationDetails.h
@@ -44,7 +44,7 @@ else()
 endif (WIN32)
 
 
-add_executable(gray-parrot-bot
+add_executable(agent
         ${BOT_COMMON_SOURCES}
         ${BOT_PLATFORM_DEPEND_SOURCES}
 
@@ -52,4 +52,4 @@ add_executable(gray-parrot-bot
         ${BOT_PLATFORM_DEPEND_HEADERS}
         )
 
-target_link_libraries(gray-parrot-bot core-lib)
+target_link_libraries(agent core-lib)

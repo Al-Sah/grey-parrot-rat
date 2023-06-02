@@ -2,7 +2,7 @@
 // Created by alsah on 11.03.23.
 //
 
-#include "Bot.h"
+#include "Agent.h"
 
 #include <iostream>
 #include <csignal>
@@ -17,24 +17,24 @@
     #include "platform-info/collectors/LinuxInfoCollector.h"
 #include "core/AgentTasksManager.h"
 
-    #define GENERATE_BOT_INSTANCE()new Bot(std::unique_ptr<IDeviceDetailsCollector>(new LinuxInfoCollector()))
+    #define GENERATE_BOT_INSTANCE()new Agent(std::unique_ptr<IDeviceDetailsCollector>(new LinuxInfoCollector()))
 #elif defined(PLATFORM_IS_WINDOWS)
     #include "platform-info/collectors/WinInfoCollector.h"
-    #define GENERATE_BOT_INSTANCE()new Bot(std::unique_ptr<IDeviceDetailsCollector>(new WinInfoCollector()))
+    #define GENERATE_BOT_INSTANCE()new Agent(std::unique_ptr<IDeviceDetailsCollector>(new WinInfoCollector()))
 #else
     #error "platform is not supported"
 #endif
 
 
 // Initialization of static fields
-Bot* Bot::bot = nullptr;
-volatile bool Bot::run = true;
-std::mutex Bot::mutex{};
-std::condition_variable Bot::run_cv{};
-BS::thread_pool Bot::pool{};
+Agent* Agent::bot = nullptr;
+volatile bool Agent::run = true;
+std::mutex Agent::mutex{};
+std::condition_variable Agent::run_cv{};
+BS::thread_pool Agent::pool{};
 
 
-void Bot::handleSystemSignal(int signal) {
+void Agent::handleSystemSignal(int signal) {
     switch (signal) {
         case SIGINT:
         case SIGTERM:
@@ -44,31 +44,31 @@ void Bot::handleSystemSignal(int signal) {
             std::cout << "Unexpectedly received signal " << signal << std::endl;
             break;
     }
-    std::lock_guard<std::mutex> lock(Bot::mutex);
+    std::lock_guard<std::mutex> lock(Agent::mutex);
     std::cout << "\nsending notification\b";
-    Bot::run = false;
-    Bot::run_cv.notify_one();
+    Agent::run = false;
+    Agent::run_cv.notify_one();
 }
 
 // TODO: make shared ??
-Bot *Bot::GetInstance() {
+Agent *Agent::GetInstance() {
     if(bot == nullptr){
         bot = GENERATE_BOT_INSTANCE();
     }
     return bot;
 }
 
-int Bot::runPerpetual() {
+int Agent::runPerpetual() {
 
-    auto instance = Bot::GetInstance();
+    auto instance = Agent::GetInstance();
 
     instance->modulesManager->registerModule(std::shared_ptr<TaskExecutor>(instance));
 
     auto result = pool.submit([](){bot->connectionsManager->start("localhost:8080");});
 
-    while (Bot::run){
-        std::unique_lock<std::mutex> lock(Bot::mutex);
-        Bot::run_cv.wait_for( lock,std::chrono::seconds(1));
+    while (Agent::run){
+        std::unique_lock<std::mutex> lock(Agent::mutex);
+        Agent::run_cv.wait_for(lock, std::chrono::seconds(1));
     }
     std::cout << "exited main loop, stopping services\n";
 
@@ -79,8 +79,8 @@ int Bot::runPerpetual() {
 }
 
 
-Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
-    TaskExecutor(ModuleInfo("bot-control", "0.0.0")),
+Agent::Agent(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
+    TaskExecutor(ModuleInfo("agent-control", "0.0.0")),
     applicationDetails(),
     deviceDetails(infoCollector->getDeviceDetails()){
 
@@ -103,7 +103,7 @@ Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
 
     // setup services
     connectionsManager = std::make_shared<ConnectionsManager>(
-            ConnectionConfig(deviceDetails.computerId, "bot")
+            ConnectionConfig(deviceDetails.computerId, "agent")
             );
 
     tasksManager = std::make_shared<AgentTasksManager>();
@@ -127,10 +127,10 @@ Bot::Bot(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
     });
 }
 
-void Bot::execute(Task task) {
+void Agent::execute(Task task) {
 
     if(get<std::string>(task.payload) != "get-state"){
-        std::cout << "Bot: Undefined command";
+        std::cout << "Agent: Undefined command";
         // TODO send notification
         return;
     }
@@ -150,7 +150,7 @@ void Bot::execute(Task task) {
 }
 
 
-msgs::AgentDescription Bot::to_proto_message() {
+msgs::AgentDescription Agent::to_proto_message() {
 
     msgs::AgentDescription agentDescription{};
 

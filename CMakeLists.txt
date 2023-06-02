@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(grey-parrot-clients
+project(grey-parrot-rat
         DESCRIPTION "Additional project to build all cpp clients"
         )
 
@@ -22,7 +22,7 @@ add_subdirectory(rat-core-lib)
 
 
 if(BUILD_BOT_APP)
-    add_subdirectory(bot)
+    add_subdirectory(agent)
 endif()
 
 if(BUILD_OPERATOR_APP)

@@ -2,13 +2,13 @@
 // Created by alsah on 14.03.23.
 //
 
-#ifndef GREY_PARROT_BOT_APPLICATION_DETAILS_H
-#define GREY_PARROT_BOT_APPLICATION_DETAILS_H
+#ifndef GREY_PARROT_AGENT_APPLICATION_DETAILS_H
+#define GREY_PARROT_AGENT_APPLICATION_DETAILS_H
 
 #include <cstdint>
 #include <string>
 
-#include "bot-version.h"
+#include "agent-version.h"
 #include "platform.h"
 
 
@@ -39,4 +39,4 @@ struct ApplicationDetails {
     static bool checkIsRoot();
 };
 
-#endif //GREY_PARROT_BOT_APPLICATION_DETAILS_H
+#endif //GREY_PARROT_AGENT_APPLICATION_DETAILS_H

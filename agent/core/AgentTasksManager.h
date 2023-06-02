@@ -2,8 +2,8 @@
 // Created by alsah on 01.06.23.
 //
 
-#ifndef GREY_PARROT_BOT_AGENT_TASKS_MANAGER_H
-#define GREY_PARROT_BOT_AGENT_TASKS_MANAGER_H
+#ifndef GREY_PARROT_AGENT_TASKS_MANAGER_H
+#define GREY_PARROT_AGENT_TASKS_MANAGER_H
 
 
 #include "tasks-managing/TasksManagerBase.h"
@@ -21,4 +21,4 @@ public:
 };
 
 
-#endif //GREY_PARROT_BOT_AGENT_TASKS_MANAGER_H
+#endif //GREY_PARROT_AGENT_TASKS_MANAGER_H

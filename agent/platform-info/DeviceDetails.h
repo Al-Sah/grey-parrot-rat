@@ -2,8 +2,8 @@
 // Created by alsah on 14.03.23.
 //
 
-#ifndef GREY_PARROT_BOT_DEVICE_DETAILS_H
-#define GREY_PARROT_BOT_DEVICE_DETAILS_H
+#ifndef GREY_PARROT_AGENT_DEVICE_DETAILS_H
+#define GREY_PARROT_AGENT_DEVICE_DETAILS_H
 
 #include <string>
 
@@ -41,4 +41,4 @@ private:
 
 
 
-#endif //GREY_PARROT_BOT_DEVICE_DETAILS_H
+#endif //GREY_PARROT_AGENT_DEVICE_DETAILS_H
