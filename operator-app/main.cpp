@@ -1,7 +1,6 @@
 #include <QApplication>
 
-#include "mainwindow.h"
-#include "operator-app-version.h"
+#include "gui/MainWindow.h"
 
 int main(int argc, char *argv[])
 {

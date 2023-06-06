@@ -12,13 +12,33 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+get_target_property(core_lib_includes core-lib INCLUDE_DIRECTORIES)
+message(STATUS "core_lib_includes ${core_lib_includes}")
+include_directories(${core_lib_includes})
+
 
 set(PROJECT_SOURCES
         main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-)
+
+        core/OperatorModulesManager.h
+        core/OperatorModulesManager.cpp
+        core/OperatorTasksManager.cpp
+        core/OperatorTasksManager.h
+
+        gui/MainWindow.cpp
+        gui/MainWindow.h
+        gui/MainWindow.ui
+
+        gui/AgentDescriptionListItem.cpp
+        gui/AgentDescriptionListItem.h
+        gui/AgentDescriptionListItem.ui
+
+        OperatorApp.cpp
+        OperatorApp.h
+
+        CoreCtrlBridge.cpp
+        CoreCtrlBridge.h
+        )
 
 
 configure_file(operator-app-version.h.in operator-app-version.h)
@@ -39,6 +59,7 @@ find_qt_libraries()
 target_link_libraries(operator-app PRIVATE
         Qt${USING_QT}::Core
         Qt${USING_QT}::Widgets
+        core-lib
         )
 
 if (WIN32)
