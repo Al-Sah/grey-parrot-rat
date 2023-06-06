@@ -14,3 +14,7 @@ TaskGenerator::TaskGenerator(ModuleInfo aModuleInfo):
 TaskGenerator::TaskGenerator(ModuleInfo aModuleInfo, const std::function<void(Task)> &callback):
         moduleInfo(std::move(aModuleInfo)),
         callback(callback){}
+
+void TaskGenerator::setCallback(const std::function<void(Task)> &aCallback) {
+    this->callback = aCallback;
+}

@@ -20,6 +20,10 @@ public:
     explicit TaskGenerator(ModuleInfo aModuleInfo);
     TaskGenerator( ModuleInfo aModuleInfo, const std::function<void(Task)>& callback);
 
+    void setCallback(const std::function<void(Task)> &aCallback);
+
+    virtual void* getUI() = 0;
+
 protected:
     const ModuleInfo moduleInfo;
     std::function<void(Task)> callback;
