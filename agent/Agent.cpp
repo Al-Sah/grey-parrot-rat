@@ -103,7 +103,7 @@ Agent::Agent(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
 
     // setup services
     connectionsManager = std::make_shared<ConnectionsManager>(
-            ConnectionConfig(deviceDetails.computerId, "agent")
+            ConnectionConfig(deviceDetails.computerId, "agent", 30)
             );
 
     tasksManager = std::make_shared<AgentTasksManager>();

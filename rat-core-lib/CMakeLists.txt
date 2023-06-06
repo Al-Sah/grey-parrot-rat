@@ -30,7 +30,8 @@ set(CORE_SOURCES
         tasks-managing/TasksMap.cpp
         tasks-managing/TasksMapper.cpp
         tasks-managing/TasksManagerBase.cpp
-        )
+
+        CoreUtils.cpp)
 
 set(CORE_HEADERS
         IControlPacketSender.h
@@ -44,7 +45,8 @@ set(CORE_HEADERS
         tasks-managing/TasksManagerBase.h
         tasks-managing/TasksMap.h
         tasks-managing/TasksMapper.h
-        )
+
+        CoreUtils.h)
 
 
 add_library(core-lib STATIC

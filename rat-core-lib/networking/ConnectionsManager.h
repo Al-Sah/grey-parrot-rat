@@ -22,17 +22,19 @@ struct ConnectionConfig {
     // Cant be changed; agent must use "bot", operator - "operator"
     const std::string endpoint;
 
+    // time in seconds to sleep before recover
+    const std::uint16_t sleep;
+
     // address and port of c2-server; potentially can be changed
     std::string c2server;
 
-    ConnectionConfig(std::string connectionId, std::string endpoint);
+    ConnectionConfig(std::string connectionId, std::string endpoint, std::uint16_t sleep);
 
     [[nodiscard]] std::string getUrl() const;
 };
 
 
 class ConnectionsManager : public IControlPacketSender{
-
 
 public:
 
@@ -51,10 +53,14 @@ public:
     void start(const std::string& c2sever);
     void stop();
 
+    void setC2StateChangeCallback(
+            const std::function<void(bool, std::string, std::uint64_t)> &onC2StateChange);
 
 private:
 
     ConnectionConfig config;
+
+    std::function<void(bool, std::string, std::uint64_t)> onC2StateChange;
 
     std::shared_ptr<IControlPacketHandler> packetsHandler;
 

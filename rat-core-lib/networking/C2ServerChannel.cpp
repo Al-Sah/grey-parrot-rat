@@ -3,6 +3,7 @@
 //
 
 #include "C2ServerChannel.h"
+#include "CoreUtils.h"
 
 #include <utility>
 #include <iostream>
@@ -39,7 +40,7 @@ void C2ServerChannel::setupChannelCallbacks() {
 
     ws->onOpen([this]{
         this->opened = true;
-        state = ChannelState::OPENED;
+        setState(ChannelState::OPENED);
         wsPromise.set_value();
 
         config.onOpened();
@@ -48,14 +49,17 @@ void C2ServerChannel::setupChannelCallbacks() {
     });
 
     ws->onError([this](const std::string& error) {
-        state = ChannelState::ERROR_CAUGHT;
+        setState(ChannelState::ERROR_CAUGHT);
         wsPromise.set_exception(std::make_exception_ptr(std::runtime_error(error)));
         std::cout << "WebSocket error: " << error << std::endl; // log it
     });
 
     ws->onClosed([this]() {
 
-        state = ChannelState::CLOSED;
+        if(state != ChannelState::WAITING_TO_RECOVER){
+            setState(ChannelState::CLOSED);
+        }
+
         // 2 close reasons: (failed to connect / due to disconnect or by remote host request )
         if(opened && run){
             // connection was opened; closed due to disconnect, have to recover
@@ -91,7 +95,7 @@ bool C2ServerChannel::tryToOpen() {
     wsPromise = std::promise<void>();
     wsOpenResult = wsPromise.get_future();
     try {
-        state = ChannelState::TRYING_TO_OPEN;
+        setState(ChannelState::OPENING);
 
         ws->open(url);
         std::cout << "Waiting for signaling to be connected..." << std::endl;
@@ -109,7 +113,7 @@ void C2ServerChannel::recoverConnection() {
         if(tryToOpen()){
             break;
         }
-        state = ChannelState::WAITING_TO_RECOVER;
+        setState(ChannelState::WAITING_TO_RECOVER);
         std::unique_lock<std::mutex> lock(mutex);
         run_cv.wait_for( lock,std::chrono::seconds(config.sleepToRecover));
     }
@@ -122,7 +126,11 @@ C2ServerChannel::C2ServerChannel(C2ServerChannelConfiguration config) : config(s
 
     ws = std::make_shared<rtc::WebSocket>(wsConfig);
     setupChannelCallbacks();
+
     state = ChannelState::INITIALIZED;
+    lastChange = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+    ).count();
 
     run = false;
     opened = false;
@@ -132,14 +140,27 @@ void C2ServerChannel::send(const std::vector<std::byte>& data) {
     ws->send(data.data(), data.size());
 }
 
+void C2ServerChannel::setState(ChannelState newState) {
+    state = newState;
+
+    lastChange = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+            ).count();
+
+    std::chrono::seconds(std::time(nullptr));
+    config.onStateChange(state, lastChange);
+}
+
 
 C2ServerChannelConfiguration::C2ServerChannelConfiguration(
         const std::function<void()> &onClosed,
         const std::function<void()> &onOpened,
         const std::function<void(std::vector<std::byte>)> &onMessage,
+        const std::function<void(ChannelState state, std::uint64_t)> &onStateChange,
         size_t sleepToRecover)
         :
         onClosed(onClosed),
         onOpened(onOpened),
         onMessage(onMessage),
+        onStateChange(onStateChange),
         sleepToRecover(sleepToRecover) {}

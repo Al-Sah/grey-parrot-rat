@@ -10,6 +10,7 @@
 #include <future>
 #include <variant>
 #include <vector>
+#include <chrono>
 
 #include "ChannelState.h"
 
@@ -19,6 +20,7 @@ struct C2ServerChannelConfiguration {
     const std::function<void()> onClosed;
     const std::function<void()> onOpened;
     const std::function<void(std::vector<std::byte>)> onMessage;
+    const std::function<void(ChannelState state, std::uint64_t)> onStateChange;
 
     // time in seconds
     const size_t sleepToRecover;
@@ -27,12 +29,14 @@ struct C2ServerChannelConfiguration {
      * @param onClosed - called after opened connection was closed by remote host or due to network issues
      * @param onOpened - called after connection was established successfully
      * @param onMessage - called on binary message received
+     * @param onStateChange - called on c2server channel changes
      * @param sleepToRecover - if failed to establish connection, sleep for set time and try again
      */
     C2ServerChannelConfiguration(
             const std::function<void()> &onClosed,
             const std::function<void()> &onOpened,
             const std::function<void(std::vector<std::byte>)> &onMessage,
+            const std::function<void(ChannelState state, std::uint64_t)> &onStateChange,
             size_t sleepToRecover
     );
 
@@ -101,12 +105,12 @@ private:
     bool opened;
 
 
-
     // timestamp of last change
-    //time lastChange;
-    ChannelState state; // TODO delete ?
+    std::uint64_t lastChange;
+    ChannelState state;
 
 
+    inline void setState(ChannelState newState);
 
     void setupChannelCallbacks();
 
