@@ -13,8 +13,10 @@ CoreCtrlBridge::CoreCtrlBridge(QWidget *mw) {
 
     connect(this, &CoreCtrlBridge::onActiveAgents, dynamic_cast<MainWindow*>(mw), &MainWindow::resetAgentsList);
 
-    connect(this,&CoreCtrlBridge::onConnectionStateChange,
-            dynamic_cast<MainWindow*>(mw), &MainWindow::updateConnectionStateChange
-            );
+    connect(this, &CoreCtrlBridge::onConnectionStateChange,
+            dynamic_cast<MainWindow*>(mw), &MainWindow::updateConnectionStateChange);
+
+    connect(this, &CoreCtrlBridge::onRunningTasksCountChange,
+            dynamic_cast<MainWindow*>(mw), &MainWindow::updateRunningTasksCount);
 }
 

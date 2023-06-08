@@ -1,11 +1,14 @@
 #include "MainWindow.h"
 #include "./ui_MainWindow.h"
 #include "AgentDescriptionListItem.h"
+#include "ItemsListDialog.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow){
+    , ui(new Ui::MainWindow)
+    , activeTasksDialog{this, "Active tasks list"}
+    , installedModulesDialog{this, "Installed modules list"}{
 
     ui->setupUi(this);
 
@@ -14,29 +17,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->labelCoreCtrlVersionValue->setText(QString::fromStdString(operatorApp->getVersion()));
 
-
     connect(ui->btnConnect, &QPushButton::clicked, this, &MainWindow::handleConnectBtnClick);
+    connect(ui->btnTasksRunning, &QPushButton::clicked, this, &MainWindow::handleTasksDetailsBtnClick);
+    connect(ui->btnInstalledModules, &QPushButton::clicked, this, &MainWindow::handleNodulesDetailsBtnClick);
 }
 
 MainWindow::~MainWindow(){
     delete ui;
     operatorApp->stop();
 }
-
-
-void MainWindow::on_btnTasksRunning_clicked()
-{
-
-}
-
-
-void MainWindow::on_btnInstalledModules_clicked()
-{
-
-}
-
-
-
 
 void MainWindow::handleConnectBtnClick() {
     ui->labelConnectionStateValue->setText("Connecting ... ");
@@ -45,6 +34,10 @@ void MainWindow::handleConnectBtnClick() {
 
 void MainWindow::updateConnectionStateChange(bool opened, const std::string &state, unsigned long time) {
     ui->labelConnectionStateValue->setText(QString::fromStdString(state));
+
+    if(opened){
+        operatorApp->requestNotifications();
+    }
 
     isConnected = opened;
 
@@ -95,9 +88,30 @@ void MainWindow::resetAgentsList(const msgs::ActiveAgents& agents) {
     }
 }
 
-/*
-void MainWindow::handleMessage(const msgs::ActiveAgents& agents) {
-    emit resetAgentsList(agents);
+void MainWindow::updateRunningTasksCount(int count) {
+    ui->labelTasksRunningValue->setText(QString::number(count));
 }
-*/
 
+
+void MainWindow::handleTasksDetailsBtnClick() {
+    std::vector<QString> items;
+    for (const auto &item: operatorApp->getRunningTasks()){
+        std::string str = std::to_string(item.id) + "; created by " + item.module;
+        items.push_back(QString::fromStdString(str));
+    }
+    activeTasksDialog.setItems(items);
+    activeTasksDialog.setModal(true);
+    activeTasksDialog.show();
+}
+
+
+void MainWindow::handleNodulesDetailsBtnClick() {
+    std::vector<QString> items;
+    for (const auto &item: operatorApp->getModulesInfo()){
+        std::string str = item.id + " - " + item.version;
+        items.push_back(QString::fromStdString(str));
+    }
+    installedModulesDialog.setItems(items);
+    installedModulesDialog.setModal(true);
+    installedModulesDialog.show();
+}

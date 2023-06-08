@@ -20,6 +20,7 @@ public:
 
 signals:
     void onActiveAgents(const msgs::ActiveAgents& agents);
+    void onRunningTasksCountChange(int count);
     void onConnectionStateChange(bool opened, const std::string& state, unsigned long time);
 };
 

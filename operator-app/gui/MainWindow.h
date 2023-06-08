@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "../OperatorApp.h"
 #include "../CoreCtrlBridge.h"
+#include "ItemsListDialog.h"
 
 #include <QTimer>
 
@@ -24,15 +25,13 @@ public:
 public slots:
     void resetAgentsList(const msgs::ActiveAgents& agents);
     void updateConnectionStateChange(bool opened, const std::string& state, std::uint64_t time);
-
-private slots:
-    void on_btnTasksRunning_clicked();
-    void on_btnInstalledModules_clicked();
-
+    void updateRunningTasksCount(int count);
 
 private:
 
     void handleConnectBtnClick();
+    void handleTasksDetailsBtnClick();
+    void handleNodulesDetailsBtnClick();
 
 
     std::uint32_t secondsLeft;
@@ -42,6 +41,9 @@ private:
     bool isConnected;
     std::shared_ptr<OperatorApp> operatorApp;
     Ui::MainWindow *ui;
+
+    ItemsListDialog activeTasksDialog;
+    ItemsListDialog installedModulesDialog;
 
 protected:
     void timerEvent(QTimerEvent *event) override;

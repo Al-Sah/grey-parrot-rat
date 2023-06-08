@@ -54,12 +54,15 @@ OperatorApp::OperatorApp() : TaskGenerator({"system-state", "0.0.0"}){
     connectionsManager->setC2StateChangeCallback([this](bool opened, const std::string &state, std::uint64_t time){
         emit resultsHandler->onConnectionStateChange(opened, state, time);
     });
+
+    tasksManager->setOnTasksCountChange([this](int count){
+        emit resultsHandler->onRunningTasksCountChange(count);
+    });
 }
 
 
 void OperatorApp::stop() {
     connectionsManager->stop();
-    connectResult.get();
 }
 
 
@@ -87,4 +90,25 @@ const std::string &OperatorApp::getVersion() const {
 
 void OperatorApp::setResultsHandler(const std::shared_ptr<CoreCtrlBridge> &resultsHandler) {
     OperatorApp::resultsHandler = resultsHandler;
+}
+
+void OperatorApp::requestNotifications() {
+
+    Task task{
+        .id = 1,
+        .module = this->getModuleInfo().id,
+        .payload = "get",
+        .isFilepath = false,
+        .isPartial = false,
+    };
+
+    callback(task);
+}
+
+std::vector<ModuleInfo> OperatorApp::getModulesInfo() const {
+    return modulesManager->getModulesInfo();
+}
+
+std::vector<TaskInfo> OperatorApp::getRunningTasks() const {
+    return tasksManager->getTasksMap().getTasks();
 }

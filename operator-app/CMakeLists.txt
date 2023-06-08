@@ -33,6 +33,10 @@ set(PROJECT_SOURCES
         gui/AgentDescriptionListItem.h
         gui/AgentDescriptionListItem.ui
 
+        gui/ItemsListDialog.cpp
+        gui/ItemsListDialog.h
+        gui/ItemsListDialog.ui
+
         OperatorApp.cpp
         OperatorApp.h
 

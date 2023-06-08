@@ -40,6 +40,10 @@ public:
 
     void connect(const std::string& c2sever);
 
+    void requestNotifications();
+
+    [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const;
+    [[nodiscard]] std::vector<TaskInfo> getRunningTasks() const;
     [[nodiscard]] const std::string &getVersion() const;
 
 private:

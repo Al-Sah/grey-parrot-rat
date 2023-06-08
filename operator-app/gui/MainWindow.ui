@@ -142,7 +142,7 @@
         <item row="2" column="1" rowspan="2">
          <widget class="QLabel" name="labelTasksRunningValue">
           <property name="text">
-           <string/>
+           <string>0</string>
           </property>
          </widget>
         </item>
@@ -182,7 +182,7 @@
         <item row="4" column="1">
          <widget class="QLabel" name="labelInstalledModulesValue">
           <property name="text">
-           <string/>
+           <string>1</string>
           </property>
          </widget>
         </item>

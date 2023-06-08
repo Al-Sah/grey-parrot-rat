@@ -22,6 +22,8 @@ public:
 
     void registerModule(const std::shared_ptr<TaskGenerator>& taskGenerator);
 
+    [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const;
+
 private:
 
     std::map<std::string, std::shared_ptr<TaskGenerator>> modules;

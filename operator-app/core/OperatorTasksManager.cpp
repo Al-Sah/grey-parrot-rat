@@ -29,6 +29,26 @@ void OperatorTasksManager::handleInbox(msgs::ControlPacket packet) {
 
 bool OperatorTasksManager::handle(Task data) {
 
+    tasks.addTaskInfo(data.id, data.module);
+
+    if(onTasksCountChange != nullptr){
+        onTasksCountChange(tasks.getSize());
+    }
+
+    msgs::ControlPacket controlPacket{};
+    msgs::ControlHeader *header = controlPacket.mutable_header();
+
+    // TODO: add other types
+    header->set_type(msgs::ControlHeader_MessageType_SINGLE);
+    header->set_module(data.module);
+    header->set_requestid(data.id);
+    header->set_isclosing(data.isClosing);
+
+    controlPacket.set_payload(std::get<std::string>(data.payload));
+
+
+    messagesSender->send(controlPacket);
+
     // TODO
     // if connection is open - send; else put to queue
     return true;

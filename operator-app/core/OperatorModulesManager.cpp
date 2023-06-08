@@ -30,3 +30,13 @@ void OperatorModulesManager::registerModule(const std::shared_ptr<TaskGenerator>
 OperatorModulesManager::OperatorModulesManager(
         const std::shared_ptr<ITaskHandler> &requestsHandler
         ) : requestsHandler(requestsHandler) {}
+
+std::vector<ModuleInfo> OperatorModulesManager::getModulesInfo() const {
+    std::vector<ModuleInfo> result;
+    result.reserve(modules.size());
+
+    for (const auto &item: modules){
+        result.push_back(item.second->getModuleInfo());
+    }
+    return result;
+}
