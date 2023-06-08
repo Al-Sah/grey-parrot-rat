@@ -12,3 +12,11 @@ void TasksManagerBase::setMessagesSender(const std::shared_ptr<IControlPacketSen
 void TasksManagerBase::setTaskHandler(const std::shared_ptr<ITaskHandler> &aTaskHandler) {
     this->taskHandler = aTaskHandler;
 }
+
+TasksMap &TasksManagerBase::getTasksMap() {
+    return tasks;
+}
+
+void TasksManagerBase::setOnTasksCountChange(const std::function<void(std::uint32_t)> &onTasksCountChange) {
+    TasksManagerBase::onTasksCountChange = onTasksCountChange;
+}

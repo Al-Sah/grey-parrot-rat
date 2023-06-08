@@ -23,12 +23,18 @@ public:
 
     virtual ~TasksManagerBase() = default;
 
+    [[nodiscard]] TasksMap &getTasksMap();
+
+    void setOnTasksCountChange(const std::function<void(std::uint32_t)> &onTasksCountChange);
+
 protected:
 
     TasksMap tasks;
 
     std::shared_ptr<IControlPacketSender> messagesSender;
     std::shared_ptr<ITaskHandler> taskHandler;
+
+    std::function<void(std::uint32_t)> onTasksCountChange;
 };
 
 #endif //GREY_PARROT_RAT_CORE_TASKS_MANAGER_H

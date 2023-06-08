@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <map>
 #include <mutex>
+#include <vector>
 
 #include "TaskInfo.h"
 
@@ -25,6 +26,9 @@ private:
 
 public:
     TasksMap() = default;
+
+    std::uint32_t getSize();
+    std::vector<TaskInfo> getTasks();
 
     // Basic CRUD operation
 

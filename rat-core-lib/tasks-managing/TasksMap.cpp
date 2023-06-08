@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <vector>
 #include "TasksMap.h"
 
 
@@ -53,6 +54,7 @@ TaskInfo TasksMap::getTaskInfo(std::uint64_t id) {
 }
 
 void TasksMap::addTaskInfo(const TaskInfo& ti) {
+    std::lock_guard<std::mutex>lock(mutex);
     if (data.find(ti.id) != data.end()) {
         std::cout << "TasksManagerBase already contains task " << ti.id << std::endl;
         // TODO replace with log
@@ -60,4 +62,19 @@ void TasksMap::addTaskInfo(const TaskInfo& ti) {
     }
 
     data.insert( {ti.id,ti} );
+}
+
+std::uint32_t TasksMap::getSize() {
+    return data.size();
+}
+
+std::vector<TaskInfo> TasksMap::getTasks() {
+    std::lock_guard<std::mutex>lock(mutex);
+    std::vector<TaskInfo> result;
+    result.reserve(data.size());
+
+    for (const auto &item: data){
+        result.push_back(item.second);
+    }
+    return result;
 }
