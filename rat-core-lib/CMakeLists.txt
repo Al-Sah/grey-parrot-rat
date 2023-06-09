@@ -41,6 +41,7 @@ set(CORE_HEADERS
         networking/ChannelState.h
         networking/C2ServerChannel.h
         networking/ConnectionsManager.h
+        networking/PeerData.h
 
         tasks-managing/TasksManagerBase.h
         tasks-managing/TasksMap.h

@@ -12,6 +12,7 @@
 #include "C2ServerChannel.h"
 #include "IControlPacketHandler.h"
 #include "IControlPacketSender.h"
+#include "PeerData.h"
 
 
 struct ConnectionConfig {
@@ -56,18 +57,26 @@ public:
     void setC2StateChangeCallback(
             const std::function<void(bool, std::string, std::uint64_t)> &onC2StateChange);
 
+    void connectToPeer(const std::string& peerId);
+    void disconnectFromCurrentPeer();
 private:
 
     ConnectionConfig config;
+    rtc::Configuration rtcConfig;
 
     std::function<void(bool, std::string, std::uint64_t)> onC2StateChange;
 
     std::shared_ptr<IControlPacketHandler> packetsHandler;
 
+    // There are 2 types of connection: with c2server and peer connection
     std::unique_ptr<C2ServerChannel> c2ServerChannel;
+    PeerData peerData;
 
     void handleC2ServerMessage(std::vector<std::byte>& data);
+    void handleSignalingMessage(const msgs::SignalingData& signalingData);
 
+    void setupPeerConnection();
+    void setupCtrlDataChannel();
 };
 
 
