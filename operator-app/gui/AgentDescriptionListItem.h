@@ -13,11 +13,18 @@ class AgentDescriptionListItem : public QWidget
     Q_OBJECT
 
 public:
-    AgentDescriptionListItem(QWidget *parent, const msgs::AgentDescription& agent);
+    AgentDescriptionListItem(QWidget *parent, msgs::AgentDescription  agent);
     ~AgentDescriptionListItem() override;
+
+    void update(msgs::AgentDescription agent);
+
+    QString getAgentId() const;
 
 private:
     Ui::AgentDescriptionListItem *ui;
+    msgs::AgentDescription agentDescription;
+
+    void updateUI();
 };
 
 #endif // GREY_PARROT_RAT_OPERATOR_GUI_AGENT_DESCRIPTION_LIST_ITEM_H

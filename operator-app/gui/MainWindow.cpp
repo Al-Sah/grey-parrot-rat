@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , installedModulesDialog{this, "Installed modules list"}{
 
     ui->setupUi(this);
+    agentsCount = 0;
 
     operatorApp = OperatorApp::GetInstance();
     operatorApp->setResultsHandler(std::make_shared<CoreCtrlBridge>(this));
@@ -76,16 +77,10 @@ void MainWindow::timerEvent(QTimerEvent *event) {
 void MainWindow::resetAgentsList(const msgs::ActiveAgents& agents) {
 
     ui->agentsListWidget->clear();
-
     for (const auto &agent: agents.data()){
-
-        auto item = new QListWidgetItem();
-        auto widget = new AgentDescriptionListItem(this, agent);
-        item->setSizeHint(widget->sizeHint());
-
-        ui->agentsListWidget->addItem(item);
-        ui->agentsListWidget->setItemWidget(item, widget);
+        addNewAgent(agent);
     }
+    ui->labelLastActionValue->setText("set list of agents");
 }
 
 void MainWindow::updateRunningTasksCount(int count) {
@@ -114,4 +109,46 @@ void MainWindow::handleNodulesDetailsBtnClick() {
     installedModulesDialog.setItems(items);
     installedModulesDialog.setModal(true);
     installedModulesDialog.show();
+}
+
+void MainWindow::addNewAgent(const msgs::AgentDescription &agentDescription) {
+
+    auto agentId = agentDescription.device().id();
+
+    auto item = new QListWidgetItem();
+    auto widget = new AgentDescriptionListItem(this, agentDescription);
+    item->setSizeHint(widget->sizeHint());
+
+    ui->agentsListWidget->addItem(item);
+    ui->agentsListWidget->setItemWidget(item, widget);
+
+    agentsCount++;
+    ui->labelAgentsNumberValue->setText(QString::number(agentsCount));
+
+    std::string action = "added new agent " + agentId;
+    ui->labelLastActionValue->setText(QString::fromStdString(action));
+}
+
+void MainWindow::removeAgent(const std::string& agentId) {
+
+    QListWidgetItem* item = nullptr;
+    for(int i = 0; i < ui->agentsListWidget->count(); ++i)
+    {
+        QListWidgetItem* tmp = ui->agentsListWidget->item(i);
+        auto widget = dynamic_cast<AgentDescriptionListItem*>(ui->agentsListWidget->itemWidget(tmp));
+        if(widget->getAgentId() == QString::fromStdString(agentId))
+        {
+            item = tmp;
+            break;
+        }
+    }
+
+    if(item != nullptr){
+        delete ui->agentsListWidget->takeItem(ui->agentsListWidget->row(item));
+        agentsCount--;
+        ui->labelAgentsNumberValue->setText(QString::number(agentsCount));
+
+        std::string action = "removed agent " + agentId;
+        ui->labelLastActionValue->setText(QString::fromStdString(action));
+    }
 }

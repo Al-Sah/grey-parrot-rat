@@ -9,6 +9,7 @@
 #include "core-data.pb.h"
 
 Q_DECLARE_METATYPE(msgs::ActiveAgents)
+Q_DECLARE_METATYPE(msgs::AgentDescription)
 Q_DECLARE_METATYPE(std::string)
 
 class CoreCtrlBridge : public QWidget{
@@ -20,6 +21,8 @@ public:
 
 signals:
     void onActiveAgents(const msgs::ActiveAgents& agents);
+    void onNewAgent(const msgs::AgentDescription& agentDescription);
+    void onAgentDisconnect(const std::string& agentId);
     void onRunningTasksCountChange(int count);
     void onConnectionStateChange(bool opened, const std::string& state, unsigned long time);
 };

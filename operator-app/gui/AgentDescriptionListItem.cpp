@@ -1,22 +1,33 @@
 #include "AgentDescriptionListItem.h"
+
+#include <utility>
 #include "ui_AgentDescriptionListItem.h"
 
-AgentDescriptionListItem::AgentDescriptionListItem(QWidget *parent, const msgs::AgentDescription& agent) :
+AgentDescriptionListItem::AgentDescriptionListItem(QWidget *parent, msgs::AgentDescription agent) :
     QWidget(parent),
-    ui(new Ui::AgentDescriptionListItem)
+    ui(new Ui::AgentDescriptionListItem),
+    agentDescription(std::move(agent))
 {
     ui->setupUi(this);
+    updateUI();
+}
 
-    ui->labelAgentIdValue->setText(QString::fromStdString(agent.device().id()));
-    ui->labelComputerNameValue->setText(QString::fromStdString(agent.device().name()));
-    ui->labelOSValue->setText(QString::fromStdString(agent.device().os()));
+AgentDescriptionListItem::~AgentDescriptionListItem()
+{
+    delete ui;
+}
+
+void AgentDescriptionListItem::updateUI() {
+    ui->labelAgentIdValue->setText(QString::fromStdString(agentDescription.device().id()));
+    ui->labelComputerNameValue->setText(QString::fromStdString(agentDescription.device().name()));
+    ui->labelOSValue->setText(QString::fromStdString(agentDescription.device().os()));
 
     ui->labelAgentStateValue->setText("Active");
-    ui->labelVersionValue->setText(QString::fromStdString(agent.app().version()));
-    ui->labelC4ArcValue->setText(QString::fromStdString(agent.app().c4arc()));
-    ui->labelC4PlatformValue->setText(QString::fromStdString(agent.app().c4platform()));
+    ui->labelVersionValue->setText(QString::fromStdString(agentDescription.app().version()));
+    ui->labelC4ArcValue->setText(QString::fromStdString(agentDescription.app().c4arc()));
+    ui->labelC4PlatformValue->setText(QString::fromStdString(agentDescription.app().c4platform()));
 
-    for (const auto &agentModule: agent.app().modules()){
+    for (const auto &agentModule: agentDescription.app().modules()){
         auto item = new QListWidgetItem();
         auto widget = new QLabel(this);
         widget->setText(QString::fromStdString(agentModule.name() + " - " + agentModule.version()));
@@ -24,11 +35,14 @@ AgentDescriptionListItem::AgentDescriptionListItem(QWidget *parent, const msgs::
         ui->modulesList->addItem(item);
         ui->modulesList->setItemWidget(item, widget);
     }
-
 }
 
-AgentDescriptionListItem::~AgentDescriptionListItem()
-{
-    delete ui;
+void AgentDescriptionListItem::update(msgs::AgentDescription agent) {
+    agentDescription = std::move(agent);
+    updateUI();
+}
+
+QString AgentDescriptionListItem::getAgentId() const {
+    return ui->labelAgentIdValue->text();
 }
 

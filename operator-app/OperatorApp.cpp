@@ -67,10 +67,28 @@ void OperatorApp::stop() {
 
 
 void OperatorApp::handleResult(Task task) {
-    msgs::ActiveAgents agents{};
-    agents.ParseFromString(std::get<std::string>(task.payload));
 
-    emit resultsHandler->onActiveAgents(agents);
+    msgs::CtrlModuleMessage msg{};
+    msg.ParseFromString(std::get<std::string>(task.payload));
+
+    switch (msg.type()) {
+
+        case msgs::CtrlModuleMessage_Type_SET_ALL:
+            emit resultsHandler->onActiveAgents(msg.agents());
+            break;
+        case msgs::CtrlModuleMessage_Type_NEW:
+            emit resultsHandler->onNewAgent(msg.agent());
+            break;
+        case msgs::CtrlModuleMessage_Type_UPDATE:
+            emit resultsHandler->onNewAgent(msg.agent());
+            break;
+        case msgs::CtrlModuleMessage_Type_DISCONNECT:
+            emit resultsHandler->onAgentDisconnect(msg.agentid());
+            break;
+        default:
+            std::cout << "OperatorApp: received message with invalid data type";
+            break;
+    }
 }
 
 

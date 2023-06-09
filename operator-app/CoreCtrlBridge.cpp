@@ -6,17 +6,19 @@
 
 #include "gui/MainWindow.h"
 
-CoreCtrlBridge::CoreCtrlBridge(QWidget *mw) {
+CoreCtrlBridge::CoreCtrlBridge(QWidget *target) {
 
     qRegisterMetaType<msgs::ActiveAgents>("ActiveAgents");
+    qRegisterMetaType<msgs::AgentDescription>("AgentDescription");
     qRegisterMetaType<std::string>("stdString");
 
-    connect(this, &CoreCtrlBridge::onActiveAgents, dynamic_cast<MainWindow*>(mw), &MainWindow::resetAgentsList);
+    auto* mw = dynamic_cast<MainWindow*>(target);
 
-    connect(this, &CoreCtrlBridge::onConnectionStateChange,
-            dynamic_cast<MainWindow*>(mw), &MainWindow::updateConnectionStateChange);
+    connect(this, &CoreCtrlBridge::onActiveAgents, mw, &MainWindow::resetAgentsList);
+    connect(this, &CoreCtrlBridge::onNewAgent, mw, &MainWindow::addNewAgent);
+    connect(this, &CoreCtrlBridge::onAgentDisconnect, mw, &MainWindow::removeAgent);
 
-    connect(this, &CoreCtrlBridge::onRunningTasksCountChange,
-            dynamic_cast<MainWindow*>(mw), &MainWindow::updateRunningTasksCount);
+    connect(this, &CoreCtrlBridge::onConnectionStateChange, mw, &MainWindow::updateConnectionStateChange);
+    connect(this, &CoreCtrlBridge::onRunningTasksCountChange, mw, &MainWindow::updateRunningTasksCount);
 }
 

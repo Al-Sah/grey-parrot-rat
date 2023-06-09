@@ -26,6 +26,8 @@ public slots:
     void resetAgentsList(const msgs::ActiveAgents& agents);
     void updateConnectionStateChange(bool opened, const std::string& state, std::uint64_t time);
     void updateRunningTasksCount(int count);
+    void addNewAgent(const msgs::AgentDescription& agentDescription);
+    void removeAgent(const std::string& agentId);
 
 private:
 
@@ -41,6 +43,8 @@ private:
     bool isConnected;
     std::shared_ptr<OperatorApp> operatorApp;
     Ui::MainWindow *ui;
+
+    int agentsCount;
 
     ItemsListDialog activeTasksDialog;
     ItemsListDialog installedModulesDialog;
