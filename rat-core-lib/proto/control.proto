@@ -31,7 +31,11 @@ message ControlPacket{
 }
 
 message SignalingData{
-  //TODO
+  string id = 1;
+  string candidate = 2;
+  string type = 3;
+  string description = 4;
+  string mid = 5;
 }
 
 message NetworkMessage{
