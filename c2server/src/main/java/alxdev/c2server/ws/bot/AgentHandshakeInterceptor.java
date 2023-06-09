@@ -1,8 +1,10 @@
 package alxdev.c2server.ws.bot;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -19,27 +21,34 @@ public class AgentHandshakeInterceptor implements HandshakeInterceptor {
     private static final int MIN_BOT_ID_LENGTH = 8;
 
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+    public boolean beforeHandshake(
+            @NonNull ServerHttpRequest request,
+            @NonNull ServerHttpResponse response,
+            @NonNull WebSocketHandler wsHandler,
+            @NonNull Map<String, Object> attributes) {
 
-        // First step: retrieve bot id
-        String botID = extractBotId(request.getURI());
-        if(botID.length() < MIN_BOT_ID_LENGTH){
-            log.info("Failed to identify bot; received id length is {}", botID.length());
+        // First step: retrieve agent id
+        String agentId = extractId(request.getURI());
+        if(agentId.length() < MIN_BOT_ID_LENGTH){
+            log.warn("failed to identify agent; received id length is {}", agentId.length());
             return false;
         }
 
         // TODO add custom auth ?
 
-        attributes.put("agent-id", botID);
+        attributes.put("agent-id", agentId);
         return true;
     }
 
     @Override
-    public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) { }
+    public void afterHandshake(
+            @NonNull ServerHttpRequest request,
+            @NonNull ServerHttpResponse response,
+            @NonNull WebSocketHandler wsHandler,
+            @Nullable Exception exception) { }
 
 
-
-    private String extractBotId(URI uri){
+    private String extractId(URI uri){
         try {
             return uri.getPath().substring(PATH_PREFIX.length());
         } catch (RuntimeException e){

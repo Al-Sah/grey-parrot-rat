@@ -6,13 +6,17 @@ import alxdev.c2server.models.proto.Control;
 import alxdev.c2server.models.proto.CoreData;
 import alxdev.c2server.services.ClientsSessionsHolder;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
+
+import java.io.IOException;
 
 
 @Slf4j
@@ -26,9 +30,11 @@ public class OperatorWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
+        String operatorId = getOperatorId(session);
+        log.info("connected new operator {}", operatorId);
 
-        clientsSessionsHolder.addOperator(session);
+        clientsSessionsHolder.addOperator(session, operatorId);
         // TODO check whether operator was added successfully
 
         var agentsBuilder = CoreData.ActiveAgents.newBuilder();
@@ -44,24 +50,67 @@ public class OperatorWebSocketHandler extends AbstractWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        log.info("received text message from bot {}", session.getAttributes().get("operator-id"));
+    protected void handleTextMessage(@NonNull WebSocketSession session, @NonNull TextMessage message) {
+        log.info("received text message from bot {}", getOperatorId(session));
     }
 
     @Override
-    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-        log.info("received binary message from bot {}", session.getAttributes().get("operator-id"));
+    protected void handleBinaryMessage( @NonNull  WebSocketSession session, @NonNull BinaryMessage message) {
+        String operatorId = getOperatorId(session);
+        log.info("received binary message from operator {}", operatorId);
+
+        Control.NetworkMessage networkMessage;
+        try{
+            networkMessage = Control.NetworkMessage.parseFrom(message.getPayload().array());
+        }catch (InvalidProtocolBufferException e) {
+            log.warn("agent {}: failed to parse inbox message, error: {}", operatorId, e.getMessage());
+            return;
+        }
+
+        switch (networkMessage.getDataCase()) {
+            case CONTROL -> handleControlMessage(networkMessage.getControl(), operatorId);
+            case SIGNALING -> handleSignalingMessage(networkMessage.getSignaling(), operatorId);
+            case DATA_NOT_SET -> log.warn("operator {}: inbox message does not contain data", operatorId);
+        }
     }
 
     @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.error("session {}: transport error {}", session.getAttributes().get("operator-id"), exception.getMessage());
+    public void handleTransportError( @NonNull WebSocketSession session, @NonNull Throwable exception) {
+        log.error("session {}: transport error {}", getOperatorId(session), exception.getMessage());
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        log.info("operator {} disconnected with status {}", session.getAttributes().get("operator-id"), status.toString());
-        clientsSessionsHolder.removeOperator((String)session.getAttributes().get("operator-id"));
+    public void afterConnectionClosed( @NonNull WebSocketSession session, CloseStatus status) {
+        String operatorId = getOperatorId(session);
+        log.info("operator {} disconnected with status {}", operatorId, status.toString());
+        clientsSessionsHolder.removeOperator(operatorId);
+    }
+
+    private String getOperatorId(WebSocketSession session){
+        return (String) session.getAttributes().get("operator-id");
+    }
+
+    void handleControlMessage(Control.ControlPacket control, String agentId){
+
+    }
+
+    void handleSignalingMessage(Control.SignalingData signalingData, String operatorId){
+
+        WebSocketSession agent = clientsSessionsHolder.getAgent(signalingData.getId()).getSession();
+        if (agent == null){
+            log.warn("handleSignalingMessage; agent is null");
+            return;
+        }
+
+        var message = Control.NetworkMessage.newBuilder()
+                .setSignaling(signalingData.toBuilder().setId(operatorId).build())
+                .build();
+
+        try {
+            agent.sendMessage(new BinaryMessage( message.toByteArray() ));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     Control.NetworkMessage generateNotification(CoreData.ActiveAgents agents){

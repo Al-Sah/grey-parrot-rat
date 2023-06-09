@@ -22,12 +22,12 @@ public class ClientsSessionsHolderBase implements ClientsSessionsHolder {
 
 
     @Override
-    public void addAgent(WebSocketSession session) {
+    public void addAgent(WebSocketSession session, String id) {
         var agentInfo = new AgentInfo();
         agentInfo.setState(AgentInfo.InfoState.COLLECTING);
 
-        activeAgents.put((String)session.getAttributes().get("bot-id"), new Agent(agentInfo,session));
-        log.info("Added new agent session {}", session);
+        activeAgents.put(id, new Agent(agentInfo,session));
+        log.debug("Added new agent: id - '{}', session - '{}'", id, session);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ClientsSessionsHolderBase implements ClientsSessionsHolder {
         try {
             activeAgents.remove(id);
         }catch (RuntimeException e){
-            log.warn("Failed to remove agent session {}", id);
+            log.warn("Failed to remove agent {}", id);
         }
     }
 
@@ -56,9 +56,9 @@ public class ClientsSessionsHolderBase implements ClientsSessionsHolder {
     }
 
     @Override
-    public void addOperator(WebSocketSession session) {
-        activeOperators.put((String)session.getAttributes().get("operator-id"), session);
-        log.debug("Added new operator session {}", session);
+    public void addOperator(WebSocketSession session, String id) {
+        activeOperators.put(id, session);
+        log.debug("Added new operator: id - '{}', session - '{}'", id, session);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ClientsSessionsHolderBase implements ClientsSessionsHolder {
         try {
             activeOperators.remove(id);
         }catch (RuntimeException e){
-            log.debug("Failed to remove operator session {}", id);
+            log.debug("Failed to remove operator {}", id);
         }
     }
 

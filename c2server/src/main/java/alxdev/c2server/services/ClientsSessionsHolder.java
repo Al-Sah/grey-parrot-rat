@@ -8,7 +8,7 @@ import java.util.List;
 public interface ClientsSessionsHolder {
 
 
-    void addAgent(WebSocketSession session);
+    void addAgent(WebSocketSession session, String id);
 
     void removeAgent(String id);
 
@@ -20,7 +20,7 @@ public interface ClientsSessionsHolder {
 
     List<WebSocketSession> getOperators(); // TODO: add filter
 
-    void addOperator(WebSocketSession session);
+    void addOperator(WebSocketSession session, String id);
 
     void removeOperator(String id);
 
