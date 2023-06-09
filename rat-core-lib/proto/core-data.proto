@@ -34,3 +34,22 @@ message AgentDescription {
 message ActiveAgents{
   repeated AgentDescription data = 1;
 }
+
+message CtrlModuleMessage{
+
+  enum Type{
+    SET_ALL = 0;
+    NEW = 1;
+    UPDATE = 2;
+    DISCONNECT = 3;
+  }
+
+  Type type = 1;
+
+  oneof data{
+      AgentDescription agent = 2;
+      ActiveAgents agents = 3;
+      string agentId = 4;
+  }
+
+}
