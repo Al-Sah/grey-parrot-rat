@@ -28,7 +28,7 @@ public class AgentWebSocketHandler extends AbstractWebSocketHandler {
 
         clientsSessionsHolder.addAgent(session);
 
-        log.info("bot {} connected", session.getAttributes().get("agent-id"));
+        log.info("bot {} connected", getAgentId(session));
 
         var header = Control.ControlHeader.newBuilder()
                 .setType(Control.ControlHeader.MessageType.SINGLE)
@@ -51,37 +51,106 @@ public class AgentWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        log.info("received text message from bot {}", session.getAttributes().get("agent-id"));
+        log.warn("received text message from bot {}", getAgentId(session));
     }
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
 
+        log.info("received binary message from bot {}", getAgentId(session));
         try{
-
-            var agent = clientsSessionsHolder.getAgent((String)session.getAttributes().get("bot-id"));
-
             var controlPacket = Control.NetworkMessage.parseFrom(message.getPayload().array()).getControl();
 
-            var agentDescription = CoreData.AgentDescription.parseFrom(controlPacket.getPayload());
+            if(controlPacket.getHeader().getType() != Control.ControlHeader.MessageType.SINGLE){
+                log.warn("Received partial message; not implemented");
+                return;
+            }
 
-            agent.getInfo().setState(AgentInfo.InfoState.VALID);
-            agent.getInfo().setDescription(agentDescription);
+            // handling core data
+            if(controlPacket.getHeader().getRequestId() == 1){
+                var agent = clientsSessionsHolder.getAgent((String)session.getAttributes().get("bot-id"));
+                var agentDescription = CoreData.AgentDescription.parseFrom(controlPacket.getPayload());
+                var isNew = agent.getInfo().getState() == AgentInfo.InfoState.COLLECTING;
+                agent.getInfo().setState(AgentInfo.InfoState.VALID);
+                agent.getInfo().setDescription(agentDescription);
 
+                var outMessage = generateNotification(isNew, agentDescription);
+
+                for (WebSocketSession operator : clientsSessionsHolder.getOperators()) {
+                    operator.sendMessage(new BinaryMessage( outMessage.toByteArray() ));
+                }
+            }
 
         }catch (IOException e) {
             e.printStackTrace();
         }
-        log.info("received binary message from bot {}", session.getAttributes().get("agent-id"));
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.error("session {}: transport error {}", session.getAttributes().get("agent-id"), exception.getMessage());
+        log.error("session {}: transport error {}", getAgentId(session), exception.getMessage());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        log.info("bot {} disconnected with status {}", session.getAttributes().get("agent-id"), status.toString());
+        log.info("bot {} disconnected with status {}", getAgentId(session), status.toString());
+
+        clientsSessionsHolder.removeAgent(getAgentId(session));
+        var outMessage = generateNotification(getAgentId(session));
+
+        for (WebSocketSession operator : clientsSessionsHolder.getOperators()) {
+            operator.sendMessage(new BinaryMessage( outMessage.toByteArray() ));
+        }
+    }
+
+    private String getAgentId(WebSocketSession session){
+        return (String) session.getAttributes().get("agent-id");
+    }
+
+
+    Control.NetworkMessage generateNotification(boolean isNew, CoreData.AgentDescription agentDescription){
+        var header = Control.ControlHeader.newBuilder()
+                .setType(Control.ControlHeader.MessageType.SINGLE)
+                .setRequestId(1)
+                .setModule("system-state")
+                .setIsClosing(false)
+                .build();
+
+        var ctrlPayload = CoreData.CtrlModuleMessage.newBuilder()
+                .setType(isNew ? CoreData.CtrlModuleMessage.Type.NEW : CoreData.CtrlModuleMessage.Type.UPDATE)
+                .setAgent(agentDescription)
+                .build();
+
+        var resultControlPacket = Control.ControlPacket.newBuilder()
+                .setHeader(header)
+                .setPayload(ByteString.copyFrom(ctrlPayload.toByteArray()))
+                .build();
+
+        return Control.NetworkMessage.newBuilder()
+                .setControl(resultControlPacket)
+                .build();
+    }
+
+    Control.NetworkMessage generateNotification(String moduleId){
+        var header = Control.ControlHeader.newBuilder()
+                .setType(Control.ControlHeader.MessageType.SINGLE)
+                .setRequestId(1)
+                .setModule("system-state")
+                .setIsClosing(false)
+                .build();
+
+        var ctrlPayload = CoreData.CtrlModuleMessage.newBuilder()
+                .setType(CoreData.CtrlModuleMessage.Type.DISCONNECT)
+                .setAgentId(moduleId)
+                .build();
+
+        var resultControlPacket = Control.ControlPacket.newBuilder()
+                .setHeader(header)
+                .setPayload(ByteString.copyFrom(ctrlPayload.toByteArray()))
+                .build();
+
+        return Control.NetworkMessage.newBuilder()
+                .setControl(resultControlPacket)
+                .build();
     }
 }

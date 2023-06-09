@@ -18,6 +18,7 @@ public interface ClientsSessionsHolder {
     List<Agent> getAgents(); // TODO: add filter
 
 
+    List<WebSocketSession> getOperators(); // TODO: add filter
 
     void addOperator(WebSocketSession session);
 

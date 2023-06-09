@@ -27,7 +27,7 @@ public class ClientsSessionsHolderBase implements ClientsSessionsHolder {
         agentInfo.setState(AgentInfo.InfoState.COLLECTING);
 
         activeAgents.put((String)session.getAttributes().get("bot-id"), new Agent(agentInfo,session));
-        log.debug("Added new agent session {}", session);
+        log.info("Added new agent session {}", session);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ClientsSessionsHolderBase implements ClientsSessionsHolder {
         try {
             activeAgents.remove(id);
         }catch (RuntimeException e){
-            log.debug("Failed to remove agent session {}", id);
+            log.warn("Failed to remove agent session {}", id);
         }
     }
 
@@ -50,6 +50,10 @@ public class ClientsSessionsHolderBase implements ClientsSessionsHolder {
         return activeAgents.values().stream().toList();
     }
 
+    @Override
+    public List<WebSocketSession> getOperators() {
+        return activeOperators.values().stream().toList();
+    }
 
     @Override
     public void addOperator(WebSocketSession session) {

@@ -40,24 +40,7 @@ public class OperatorWebSocketHandler extends AbstractWebSocketHandler {
             agentsBuilder.addData(agent.getInfo().getDescription());
         }
 
-        var header = Control.ControlHeader.newBuilder()
-                .setType(Control.ControlHeader.MessageType.SINGLE)
-                .setRequestId(1)
-                .setModule("system-state")
-                .setIsClosing(false)
-                .build();
-
-        var controlPacket = Control.ControlPacket.newBuilder()
-                .setHeader(header)
-                .setPayload(ByteString.copyFrom(agentsBuilder.build().toByteArray()))
-                .build();
-
-        var message = Control.NetworkMessage.newBuilder()
-                .setControl(controlPacket)
-                .build();
-
-
-        session.sendMessage(new BinaryMessage(message.toByteArray()));
+        session.sendMessage(new BinaryMessage(generateNotification(agentsBuilder.build()).toByteArray()));
     }
 
     @Override
@@ -78,5 +61,30 @@ public class OperatorWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("operator {} disconnected with status {}", session.getAttributes().get("operator-id"), status.toString());
+        clientsSessionsHolder.removeOperator((String)session.getAttributes().get("operator-id"));
     }
+
+    Control.NetworkMessage generateNotification(CoreData.ActiveAgents agents){
+        var header = Control.ControlHeader.newBuilder()
+                .setType(Control.ControlHeader.MessageType.SINGLE)
+                .setRequestId(1)
+                .setModule("system-state")
+                .setIsClosing(false)
+                .build();
+
+        var ctrlPayload = CoreData.CtrlModuleMessage.newBuilder()
+                .setType(CoreData.CtrlModuleMessage.Type.SET_ALL)
+                .setAgents(agents)
+                .build();
+
+        var resultControlPacket = Control.ControlPacket.newBuilder()
+                .setHeader(header)
+                .setPayload(ByteString.copyFrom(ctrlPayload.toByteArray()))
+                .build();
+
+        return Control.NetworkMessage.newBuilder()
+                .setControl(resultControlPacket)
+                .build();
+    }
+
 }
