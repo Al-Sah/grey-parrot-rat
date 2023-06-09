@@ -66,7 +66,7 @@ macro(get_libdatachannel_project)
             # Download step (using git)
             GIT_REPOSITORY  "https://github.com/paullouisageneau/libdatachannel"
             GIT_REMOTE_NAME "origin"
-            GIT_TAG         "refs/tags/v0.18.2" #376a59eaed4b93fb7851524819ad3eb71c6e52af
+            GIT_TAG         "refs/tags/v0.18.4"
             # GIT_SUBMODULES ??
             GIT_SUBMODULES_RECURSE ON
             GIT_PROGRESS    ON
@@ -168,3 +168,59 @@ macro(get_nlohmann_json_project)
             )
 
 endmacro()
+
+# TODO: replace libdatachannel websocket with websocketpp (add asio + fix for c++20)
+#[[
+macro(get_websocketpp_project)
+
+    message(STATUS "Configuring external websocketpp project ... ")
+
+    set(WEBSOCKETPP_PROJECT   "${CMAKE_CURRENT_BINARY_DIR}/websocketpp")
+    set(WEBSOCKETPP_INCLUDES  "${WEBSOCKETPP_PROJECT}/res/include")
+
+    set(WEBSOCKETPP_CMAKE_ARGS
+            # environment
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+            -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> # install in cmake-build folder
+
+            # project (websocketpp) specific options
+            # ???
+            )
+
+    # Configure websocketpp as an external project
+    ExternalProject_Add(sd-party-websocketpp
+
+            # directory options
+            PREFIX "${WEBSOCKETPP_PROJECT}" # root directory for the external (nlohmann-json) project
+            STAMP_DIR       "${WEBSOCKETPP_PROJECT}/stamp"
+            SOURCE_DIR      "${WEBSOCKETPP_PROJECT}/src"
+            BINARY_DIR      "${WEBSOCKETPP_PROJECT}/bin"
+            INSTALL_DIR     "${WEBSOCKETPP_PROJECT}/res"
+            LOG_DIR         "${WEBSOCKETPP_PROJECT}/log"
+
+            GIT_REPOSITORY  "https://github.com/zaphoyd/websocketpp.git"
+            GIT_REMOTE_NAME "origin"
+            GIT_TAG         "refs/tags/0.8.2"
+            GIT_PROGRESS    ON
+            GIT_SHALLOW     ON  # Get just specified commit (GIT_TAG)
+
+            CMAKE_ARGS      "${WEBSOCKETPP_CMAKE_ARGS}"
+
+            UPDATE_COMMAND ""
+
+            # Test step
+            TEST_COMMAND "" # Run without tests
+
+            # This library is header only
+
+            # Log
+            LOG_DOWNLOAD    ON
+            LOG_CONFIGURE   ON
+            LOG_BUILD       ON
+            LOG_INSTALL     ON
+            )
+
+endmacro()
+]]
