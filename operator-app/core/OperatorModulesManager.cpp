@@ -23,13 +23,19 @@ bool OperatorModulesManager::handle(Task task) {
 }
 
 void OperatorModulesManager::registerModule(const std::shared_ptr<TaskGenerator>& taskGenerator) {
-    taskGenerator->setCallback([this](const Task& task) {requestsHandler->handle(task);});
+
+    taskGenerator->setCallback([this](const Task& task) {
+        // TODO: run in another thread ...
+        taskHandler->handle(task);
+    });
+
     modules.insert({taskGenerator->getModuleInfo().id, taskGenerator});
 }
 
 OperatorModulesManager::OperatorModulesManager(
         const std::shared_ptr<ITaskHandler> &requestsHandler
-        ) : requestsHandler(requestsHandler) {}
+        ) : ModulesManagerBase(requestsHandler) {}
+
 
 std::vector<ModuleInfo> OperatorModulesManager::getModulesInfo() const {
     std::vector<ModuleInfo> result;

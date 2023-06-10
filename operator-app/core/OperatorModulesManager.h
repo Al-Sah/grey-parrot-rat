@@ -12,24 +12,20 @@
 
 #include "TaskGenerator.h"
 #include "ITaskHandler.h"
+#include "modules-managing/ModulesManagerBase.h"
 
-class OperatorModulesManager : public ITaskHandler{
+class OperatorModulesManager : public ModulesManagerBase{
 
 public:
-    explicit OperatorModulesManager(const std::shared_ptr<ITaskHandler> &requestsHandler);
-
+    explicit OperatorModulesManager(const std::shared_ptr<ITaskHandler> &taskHandler);
     bool handle(Task task) override;
-
     void registerModule(const std::shared_ptr<TaskGenerator>& taskGenerator);
-
-    [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const;
+    [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const override;
 
 private:
 
     std::map<std::string, std::shared_ptr<TaskGenerator>> modules;
 
-    // handler to pass "Task" from module to the core
-    const std::shared_ptr<ITaskHandler> requestsHandler;
 };
 
 
