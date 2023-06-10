@@ -31,6 +31,8 @@ set(CORE_SOURCES
         tasks-managing/TasksMapper.cpp
         tasks-managing/TasksManagerBase.cpp
 
+        modules-managing/ModulesManagerBase.cpp
+
         CoreUtils.cpp)
 
 set(CORE_HEADERS
@@ -46,6 +48,8 @@ set(CORE_HEADERS
         tasks-managing/TasksManagerBase.h
         tasks-managing/TasksMap.h
         tasks-managing/TasksMapper.h
+
+        modules-managing/ModulesManagerBase.h
 
         CoreUtils.h)
 
