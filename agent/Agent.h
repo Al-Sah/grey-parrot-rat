@@ -34,7 +34,7 @@ public:
     void operator=(const Agent &) = delete;
 
     static Agent *GetInstance();
-    static int runPerpetual();
+    int runPerpetual();
 
 private:
 

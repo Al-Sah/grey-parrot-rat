@@ -11,12 +11,13 @@
 
 #include <core-data.pb.h>
 #include "networking/ConnectionsManager.h"
-#include "tasks-managing/TasksManagerBase.h"
+#include "core/AgentTasksManager.h"
+
+// TODO: tmp solution
+//#include "../modules/echo/EchoHandler.h"
 
 #if defined(PLATFORM_IS_LINUX)
     #include "platform-info/collectors/LinuxInfoCollector.h"
-#include "core/AgentTasksManager.h"
-
     #define GENERATE_BOT_INSTANCE()new Agent(std::unique_ptr<IDeviceDetailsCollector>(new LinuxInfoCollector()))
 #elif defined(PLATFORM_IS_WINDOWS)
     #include "platform-info/collectors/WinInfoCollector.h"
@@ -60,19 +61,20 @@ Agent *Agent::GetInstance() {
 
 int Agent::runPerpetual() {
 
-    auto instance = Agent::GetInstance();
+    modulesManager->registerModule(std::shared_ptr<TaskExecutor>(this));
+    //modulesManager->registerModule(std::make_shared<EchoHandler>());
 
-    instance->modulesManager->registerModule(std::shared_ptr<TaskExecutor>(instance));
+    auto result = pool.submit([this](){
+        connectionsManager->start("localhost:8080");
+    });
 
-    auto result = pool.submit([](){bot->connectionsManager->start("localhost:8080");});
-
-    while (Agent::run){
-        std::unique_lock<std::mutex> lock(Agent::mutex);
-        Agent::run_cv.wait_for(lock, std::chrono::seconds(1));
+    while (run){
+        std::unique_lock<std::mutex> lock(mutex);
+        run_cv.wait_for(lock, std::chrono::seconds(1));
     }
     std::cout << "exited main loop, stopping services\n";
 
-    instance->connectionsManager->stop();
+    connectionsManager->stop();
     result.get();
 
     return 0;
@@ -107,7 +109,7 @@ Agent::Agent(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
             );
 
     tasksManager = std::make_shared<AgentTasksManager>();
-    modulesManager = std::make_shared<AgentModulesManager>();
+    modulesManager = std::make_shared<AgentModulesManager>(tasksManager);
 
 
     // setup dependencies between services
@@ -117,9 +119,9 @@ Agent::Agent(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
     // Task result 'lifecycle':
     // module -> TaskExecutorsManager -> TasksManagerBase -> ConnectionsManager
 
-    connectionsManager->setTasksHandler(std::shared_ptr<IControlPacketHandler>(tasksManager.get()));
-    tasksManager->setTaskHandler(std::shared_ptr<ITaskHandler>(modulesManager.get()));
-    tasksManager->setMessagesSender(std::shared_ptr<IControlPacketSender>(connectionsManager.get()));
+    connectionsManager->setTasksHandler(tasksManager);
+    tasksManager->setTaskHandler(modulesManager);
+    tasksManager->setMessagesSender(connectionsManager);
 
 
     setCallback([this](Task tr){
@@ -167,7 +169,7 @@ msgs::AgentDescription Agent::to_proto_message() {
     appInfo->set_c4platform(applicationDetails.compiledFor);
     appInfo->set_c4arc(std::to_string(applicationDetails.compiledForArc));
 
-    for (const auto &item: modulesManager->getExecutorsInfo()){
+    for (const auto &item: modulesManager->getModulesInfo()){
         auto moduleInfoPrt = appInfo->add_modules();
         moduleInfoPrt->set_name(item.id);
         moduleInfoPrt->set_version(item.version);

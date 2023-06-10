@@ -1,5 +1,5 @@
 #include "Agent.h"
 
 int main() {
-    return Agent::runPerpetual();
+    return Agent::GetInstance()->runPerpetual();
 }

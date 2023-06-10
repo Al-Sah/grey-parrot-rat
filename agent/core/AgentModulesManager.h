@@ -12,19 +12,19 @@
 
 #include "TaskExecutor.h"
 #include "ITaskHandler.h"
+#include "modules-managing/ModulesManagerBase.h"
 
-class AgentModulesManager : public ITaskHandler{
-
-private:
-
-    std::map<std::string, std::shared_ptr<TaskExecutor>> modules;
+class AgentModulesManager : public ModulesManagerBase{
 
 public:
+    explicit AgentModulesManager(const std::shared_ptr<ITaskHandler> &requestsHandler);
+
     bool handle(Task data) override;
-
     void registerModule(const std::shared_ptr<TaskExecutor>& taskExecutor);
+    [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const override;
 
-    [[nodiscard]] std::list<ModuleInfo> getExecutorsInfo() const;
+private:
+    std::map<std::string, std::shared_ptr<TaskExecutor>> modules;
 };
 
 
