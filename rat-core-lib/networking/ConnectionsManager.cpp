@@ -99,9 +99,18 @@ void ConnectionsManager::setC2StateChangeCallback(
     this->onC2StateChange = pOnC2StateChange;
 }
 
+void ConnectionsManager::setPeerStateChangeCallback(
+        const std::function<void(bool, std::string, std::uint64_t)> &pOnPeerStateChange) {
+    this->onPeerStateChange = pOnPeerStateChange;
+}
+
 void ConnectionsManager::disconnectFromCurrentPeer() {
     peerData.remoteId.clear();
-    peerData.ctrlChannel->close();
+
+    if(peerData.ctrlChannel != nullptr){
+        peerData.ctrlChannel->close();
+        peerData.ctrlChannel = nullptr;
+    }
 
     if(peerData.connection != nullptr){
         peerData.connection->close();
@@ -125,6 +134,14 @@ void ConnectionsManager::setupPeerConnection() {
 
     peerData.connection->onStateChange([this](rtc::PeerConnection::State state) {
         std::cout << "SIGNALING: Called onStateChange: " << state << std::endl;
+
+        if(onC2StateChange != nullptr){
+            onPeerStateChange(
+                    state == rtc::PeerConnection::State::Connected,
+                    CoreUtils::convert(state),
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now().time_since_epoch()).count());
+        }
 
         if(state == rtc::PeerConnection::State::Closed || state == rtc::PeerConnection::State::Failed){
             disconnectFromCurrentPeer();

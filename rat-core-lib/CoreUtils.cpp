@@ -3,6 +3,7 @@
 //
 
 #include <algorithm>
+#include <map>
 #include "CoreUtils.h"
 
 std::string CoreUtils::convert(ChannelState state) {
@@ -31,4 +32,17 @@ std::vector<std::byte> CoreUtils::convert(const std::string &str) {
             });
 
     return bytes;
+}
+
+std::string CoreUtils::convert(rtc::PeerConnection::State state) {
+    static std::map<rtc::PeerConnection::State,std::string> values{
+            {rtc::PeerConnection::State::Connected, "connected"},
+            {rtc::PeerConnection::State::Failed, "failed"},
+            {rtc::PeerConnection::State::Closed, "closed"},
+            {rtc::PeerConnection::State::New, "new"},
+            {rtc::PeerConnection::State::Connecting, "connecting"},
+            {rtc::PeerConnection::State::Disconnected, "disconnected"},
+    };
+
+    return values[state];
 }

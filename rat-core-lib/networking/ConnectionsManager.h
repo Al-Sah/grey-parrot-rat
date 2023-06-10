@@ -56,6 +56,8 @@ public:
 
     void setC2StateChangeCallback(
             const std::function<void(bool, std::string, std::uint64_t)> &onC2StateChange);
+    void setPeerStateChangeCallback(
+            const std::function<void(bool, std::string, std::uint64_t)> &onPeerStateChange);
 
     void connectToPeer(const std::string& peerId);
     void disconnectFromCurrentPeer();
@@ -65,6 +67,7 @@ private:
     rtc::Configuration rtcConfig;
 
     std::function<void(bool, std::string, std::uint64_t)> onC2StateChange;
+    std::function<void(bool, std::string, std::uint64_t)> onPeerStateChange;
 
     std::shared_ptr<IControlPacketHandler> packetsHandler;
 
