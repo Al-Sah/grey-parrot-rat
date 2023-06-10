@@ -46,3 +46,7 @@ QString AgentDescriptionListItem::getAgentId() const {
     return ui->labelAgentIdValue->text();
 }
 
+const msgs::AgentDescription &AgentDescriptionListItem::getAgentDescription() const {
+    return agentDescription;
+}
+

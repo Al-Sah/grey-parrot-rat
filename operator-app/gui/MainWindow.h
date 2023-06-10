@@ -7,6 +7,7 @@
 #include "ItemsListDialog.h"
 
 #include <QTimer>
+#include <QListWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,7 +25,8 @@ public:
 
 public slots:
     void resetAgentsList(const msgs::ActiveAgents& agents);
-    void updateConnectionStateChange(bool opened, const std::string& state, std::uint64_t time);
+    void updateC2ServerConnectionState(const ConnectionChange& change);
+    void updatePeerConnectionState(const ConnectionChange& change);
     void updateRunningTasksCount(int count);
     void addNewAgent(const msgs::AgentDescription& agentDescription);
     void removeAgent(const std::string& agentId);
@@ -34,7 +36,8 @@ private:
     void handleConnectBtnClick();
     void handleTasksDetailsBtnClick();
     void handleNodulesDetailsBtnClick();
-
+    void handleAgentItemClicked(QListWidgetItem *item);
+    void handleReturnBtnClick();
 
     std::uint32_t secondsLeft;
     bool timerSet;

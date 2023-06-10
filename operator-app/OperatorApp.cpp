@@ -52,7 +52,10 @@ OperatorApp::OperatorApp() : TaskGenerator({"system-state", "0.0.0"}){
     tasksManager->setMessagesSender(std::shared_ptr<IControlPacketSender>(connectionsManager.get()));
 
     connectionsManager->setC2StateChangeCallback([this](bool opened, const std::string &state, std::uint64_t time){
-        emit resultsHandler->onConnectionStateChange(opened, state, time);
+        emit resultsHandler->onC2ServerConnectionState({opened, state, time});
+    });
+    connectionsManager->setPeerStateChangeCallback([this](bool opened, const std::string &state, std::uint64_t time){
+        emit resultsHandler->onPeerConnectionState({opened, state, time});
     });
 
     tasksManager->setOnTasksCountChange([this](int count){
@@ -129,4 +132,12 @@ std::vector<ModuleInfo> OperatorApp::getModulesInfo() const {
 
 std::vector<TaskInfo> OperatorApp::getRunningTasks() const {
     return tasksManager->getTasksMap().getTasks();
+}
+
+void OperatorApp::disconnectFromPeer() {
+    connectionsManager->disconnectFromCurrentPeer();
+}
+
+void OperatorApp::connectToPeer(const std::string &peer) {
+    connectionsManager->connectToPeer(peer);
 }

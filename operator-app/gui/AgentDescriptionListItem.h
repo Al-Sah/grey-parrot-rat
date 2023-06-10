@@ -20,6 +20,8 @@ public:
 
     QString getAgentId() const;
 
+    const msgs::AgentDescription &getAgentDescription() const;
+
 private:
     Ui::AgentDescriptionListItem *ui;
     msgs::AgentDescription agentDescription;

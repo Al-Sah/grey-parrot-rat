@@ -37,10 +37,12 @@ public:
     static std::shared_ptr<OperatorApp> GetInstance();
 
     void stop();
-
     void connect(const std::string& c2sever);
-
+    void setResultsHandler(const std::shared_ptr<CoreCtrlBridge> &resultsHandler);
     void requestNotifications();
+
+    void connectToPeer(const std::string& peer);
+    void disconnectFromPeer();
 
     [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const;
     [[nodiscard]] std::vector<TaskInfo> getRunningTasks() const;
@@ -68,8 +70,6 @@ private:
     std::shared_ptr<OperatorModulesManager> modulesManager;
 
     std::shared_ptr<CoreCtrlBridge> resultsHandler;
-public:
-    void setResultsHandler(const std::shared_ptr<CoreCtrlBridge> &resultsHandler);
 };
 
 

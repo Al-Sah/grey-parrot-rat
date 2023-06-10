@@ -17,10 +17,13 @@ MainWindow::MainWindow(QWidget *parent)
     operatorApp->setResultsHandler(std::make_shared<CoreCtrlBridge>(this));
 
     ui->labelCoreCtrlVersionValue->setText(QString::fromStdString(operatorApp->getVersion()));
+    ui->stackedWidget->setCurrentIndex(0);
 
+    connect(ui->btnReturn, &QPushButton::clicked, this, &MainWindow::handleReturnBtnClick);
     connect(ui->btnConnect, &QPushButton::clicked, this, &MainWindow::handleConnectBtnClick);
     connect(ui->btnTasksRunning, &QPushButton::clicked, this, &MainWindow::handleTasksDetailsBtnClick);
     connect(ui->btnInstalledModules, &QPushButton::clicked, this, &MainWindow::handleNodulesDetailsBtnClick);
+    connect(ui->agentsListWidget, &QListWidget::itemDoubleClicked, this, &MainWindow::handleAgentItemClicked);
 }
 
 MainWindow::~MainWindow(){
@@ -33,14 +36,14 @@ void MainWindow::handleConnectBtnClick() {
     operatorApp->connect(ui->c2serverInput->text().toStdString());
 }
 
-void MainWindow::updateConnectionStateChange(bool opened, const std::string &state, unsigned long time) {
-    ui->labelConnectionStateValue->setText(QString::fromStdString(state));
+void MainWindow::updateC2ServerConnectionState(const ConnectionChange& change) {
+    ui->labelConnectionStateValue->setText(QString::fromStdString(change.state));
 
-    if(opened){
+    isConnected = change.opened;
+
+    if(isConnected){
         operatorApp->requestNotifications();
     }
-
-    isConnected = opened;
 
     if(!isConnected && !timerSet){
         timerSet = true;
@@ -56,11 +59,18 @@ void MainWindow::updateConnectionStateChange(bool opened, const std::string &sta
 
     //auto tp =
     // std::chrono::duration_cast<std::chrono::system_clock::time_point::duration>(std::chrono::milliseconds (time));
-    ui->labelLastStateChangeValue->setText(QString::number(time));
+    ui->labelLastStateChangeValue->setText(QString::number(change.timestamp));
 
-    QString tmp = opened ? "opened" : "closed";
+    QString tmp = isConnected ? "opened" : "closed";
 
     ui->statusbar->showMessage("c2server channel state - " + tmp);
+}
+
+void MainWindow::updatePeerConnectionState(const ConnectionChange &change) {
+
+    ui->agentModulesTabs->setEnabled(change.opened);
+    ui->labelPeerStateValue->setText(QString::fromStdString(change.state));
+    ui->labelPeerChangeTimeValue->setText(QString::number(change.timestamp));
 }
 
 
@@ -151,4 +161,28 @@ void MainWindow::removeAgent(const std::string& agentId) {
         std::string action = "removed agent " + agentId;
         ui->labelLastActionValue->setText(QString::fromStdString(action));
     }
+}
+
+void MainWindow::handleAgentItemClicked(QListWidgetItem* item)
+{
+    auto widget = dynamic_cast<AgentDescriptionListItem*>(ui->agentsListWidget->itemWidget(item));
+    auto agentDescription = widget->getAgentDescription();
+
+    ui->labelAgentIdValue->setText(QString::fromStdString(agentDescription.device().id()));
+    ui->labelComputerNameValue->setText(QString::fromStdString(agentDescription.device().name()));
+    ui->labelOSValue->setText(QString::fromStdString(agentDescription.device().os()));
+
+    ui->labelVersionValue->setText(QString::fromStdString(agentDescription.app().version()));
+    ui->labelC4ArcValue->setText(QString::fromStdString(agentDescription.app().c4arc()));
+    ui->labelC4PlatformValue->setText(QString::fromStdString(agentDescription.app().c4platform()));
+    ui->labelModulesCountValue->setText(QString::number(agentDescription.app().modules().size()));
+
+
+    ui->stackedWidget->setCurrentIndex(1);
+    operatorApp->connectToPeer(agentDescription.device().id());
+}
+
+void MainWindow::handleReturnBtnClick() {
+    operatorApp->disconnectFromPeer();
+    ui->stackedWidget->setCurrentIndex(0);
 }

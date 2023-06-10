@@ -42,7 +42,7 @@ set(PROJECT_SOURCES
 
         CoreCtrlBridge.cpp
         CoreCtrlBridge.h
-        )
+        ConnectionChangeInfo.h)
 
 
 configure_file(operator-app-version.h.in operator-app-version.h)

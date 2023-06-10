@@ -10,6 +10,7 @@ CoreCtrlBridge::CoreCtrlBridge(QWidget *target) {
 
     qRegisterMetaType<msgs::ActiveAgents>("ActiveAgents");
     qRegisterMetaType<msgs::AgentDescription>("AgentDescription");
+    qRegisterMetaType<ConnectionChange>("ConnectionChange");
     qRegisterMetaType<std::string>("stdString");
 
     auto* mw = dynamic_cast<MainWindow*>(target);
@@ -18,7 +19,8 @@ CoreCtrlBridge::CoreCtrlBridge(QWidget *target) {
     connect(this, &CoreCtrlBridge::onNewAgent, mw, &MainWindow::addNewAgent);
     connect(this, &CoreCtrlBridge::onAgentDisconnect, mw, &MainWindow::removeAgent);
 
-    connect(this, &CoreCtrlBridge::onConnectionStateChange, mw, &MainWindow::updateConnectionStateChange);
+    connect(this, &CoreCtrlBridge::onC2ServerConnectionState, mw, &MainWindow::updateC2ServerConnectionState);
+    connect(this, &CoreCtrlBridge::onPeerConnectionState, mw, &MainWindow::updatePeerConnectionState);
     connect(this, &CoreCtrlBridge::onRunningTasksCountChange, mw, &MainWindow::updateRunningTasksCount);
 }
 

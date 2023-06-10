@@ -7,10 +7,12 @@
 
 #include <QWidget>
 #include "core-data.pb.h"
+#include "ConnectionChangeInfo.h"
 
 Q_DECLARE_METATYPE(msgs::ActiveAgents)
 Q_DECLARE_METATYPE(msgs::AgentDescription)
 Q_DECLARE_METATYPE(std::string)
+Q_DECLARE_METATYPE(ConnectionChange)
 
 class CoreCtrlBridge : public QWidget{
 
@@ -24,7 +26,10 @@ signals:
     void onNewAgent(const msgs::AgentDescription& agentDescription);
     void onAgentDisconnect(const std::string& agentId);
     void onRunningTasksCountChange(int count);
-    void onConnectionStateChange(bool opened, const std::string& state, unsigned long time);
+
+    void onC2ServerConnectionState(const ConnectionChange& change);
+    void onPeerConnectionState(const ConnectionChange& change);
+
 };
 
 #endif //GREY_PARROT_RAT_OPERATOR_CORE_CTRL_BRIDGE_H
