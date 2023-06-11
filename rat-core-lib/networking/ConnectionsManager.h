@@ -51,6 +51,7 @@ public:
     void operator = (ConnectionsManager) = delete;
 
     void send(const msgs::ControlPacket&  data) override;
+    std::size_t getMaxSize(bool c2channel) override;
 
     void start(const std::string& c2sever);
     void stop();

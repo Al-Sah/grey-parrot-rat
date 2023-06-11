@@ -5,6 +5,11 @@
 #include "OperatorTasksManager.h"
 #include "tasks-managing/TasksMapper.h"
 
+#include <filesystem>
+#include <fstream>
+
+#include "general-data.pb.h"
+
 void OperatorTasksManager::handleInbox(msgs::ControlPacket packet) {
 
     switch (packet.header().type()) {
@@ -38,15 +43,36 @@ bool OperatorTasksManager::handle(Task data) {
     msgs::ControlPacket controlPacket{};
     msgs::ControlHeader *header = controlPacket.mutable_header();
 
+
+    if(data.isFilepath){
+        std::filesystem::path path{std::get<std::string>(data.payload)};
+
+        if(!std::filesystem::exists(path)){
+            return false;
+        }
+        std::size_t filesize = std::filesystem::file_size(path);
+
+        if(messagesSender->getMaxSize(!data.asPeer) < 50){
+            return false;
+        }
+
+        if(messagesSender->getMaxSize(!data.asPeer) - 50 > filesize){
+            controlPacket.set_payload(loadFile(path).SerializeAsString());
+        } else{
+            std::cout << "Cannot handle file; size: " << filesize << std::endl;
+            return false;
+        }
+    } else{
+        controlPacket.set_payload(std::get<std::string>(data.payload));
+    }
+
+
     // TODO: add other types
     header->set_type(msgs::ControlHeader_MessageType_SINGLE);
     header->set_module(data.module);
     header->set_requestid(data.id);
     header->set_isclosing(data.isClosing);
     header->set_peer(data.asPeer);
-
-    controlPacket.set_payload(std::get<std::string>(data.payload));
-
 
     messagesSender->send(controlPacket);
 

@@ -7,11 +7,12 @@
 
 
 #include "TasksMap.h"
-
+#include <filesystem>
 
 #include "IControlPacketHandler.h"
 #include "IControlPacketSender.h"
 #include "ITaskHandler.h"
+#include "general-data.pb.h"
 
 
 class TasksManagerBase : public IControlPacketHandler, public ITaskHandler{
@@ -28,6 +29,8 @@ public:
     void setOnTasksCountChange(const std::function<void(std::uint32_t)> &onTasksCountChange);
 
 protected:
+
+    static msgs::FileData loadFile(const std::filesystem::path& path);
 
     TasksMap tasks;
 

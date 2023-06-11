@@ -19,6 +19,14 @@ get_nlohmann_json_project()
 
 check_platform_and_compiler()
 
+
+# TODO: if not found - use as external project
+find_package(Protobuf REQUIRED)
+
+message( STATUS "PROTOBUF: include_dirs: ${Protobuf_INCLUDE_DIRS}")
+message( STATUS "PROTOBUF: dir with result: ${CMAKE_CURRENT_BINARY_DIR}")
+message( STATUS "PROTOBUF: libraries: ${Protobuf_LIBRARIES}")
+
 # set(QT_DIR "C:/Qt/5.15.2/mingw81_64/")
 # set(QT_DIR "/opt/Qt/5.15.2/gcc_64/")
 # # pass as -DQT_DIR_PATH:STRING="/opt/Qt/5.15.2/gcc_64/"

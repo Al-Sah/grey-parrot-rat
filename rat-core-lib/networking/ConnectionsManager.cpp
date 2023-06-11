@@ -85,6 +85,18 @@ void ConnectionsManager::handleC2ServerMessage(std::vector<std::byte> &data) {
     }
 }
 
+std::size_t ConnectionsManager::getMaxSize(bool c2channel) {
+
+    if (c2channel) {
+        c2ServerChannel->getMaxMessageSize();
+    }
+    if(peerData.ctrlChannel == nullptr ){
+        return 0;
+    }
+    return peerData.ctrlChannel->maxMessageSize();
+}
+
+
 void ConnectionsManager::send(const msgs::ControlPacket& data) {
 
     if(data.header().peer()){

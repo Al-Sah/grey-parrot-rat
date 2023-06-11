@@ -82,6 +82,11 @@ public:
      */
     void send(const std::vector<std::byte>& data);
 
+    /**
+     * get max message size that can be transferred
+     */
+    std::size_t getMaxMessageSize();
+
     C2ServerChannel(C2ServerChannel&) = delete;
     C2ServerChannel(const C2ServerChannel&) = delete;
     void operator = (const C2ServerChannel&) = delete;

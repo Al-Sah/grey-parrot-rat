@@ -151,6 +151,9 @@ void C2ServerChannel::setState(ChannelState newState) {
     config.onStateChange(state, lastChange);
 }
 
+std::size_t C2ServerChannel::getMaxMessageSize(){
+    return ws->maxMessageSize();
+}
 
 C2ServerChannelConfiguration::C2ServerChannelConfiguration(
         const std::function<void()> &onClosed,

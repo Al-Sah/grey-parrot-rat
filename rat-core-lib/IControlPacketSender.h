@@ -18,6 +18,8 @@
 class IControlPacketSender {
 public:
     virtual void send(const msgs::ControlPacket&  data) = 0;
+
+    virtual std::size_t getMaxSize(bool c2channel) = 0;
 };
 
 

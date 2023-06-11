@@ -6,8 +6,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${LIBDATACHANNEL_INCLUDES})
+include_directories(
+        ${Protobuf_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${LIBDATACHANNEL_INCLUDES}
+)
+
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS general-data.proto)
+
 
 set(SDK_SOURCES
         TaskExecutor.cpp
@@ -21,4 +28,4 @@ set(SDK_HEADERS
         ModuleInfo.h
         )
 
-add_library(modules-sdk STATIC ${SDK_HEADERS} ${SDK_SOURCES})
+add_library(modules-sdk STATIC ${SDK_HEADERS} ${SDK_SOURCES} ${PROTO_SRCS} ${PROTO_HDRS})

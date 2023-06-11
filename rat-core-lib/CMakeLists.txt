@@ -2,14 +2,6 @@ cmake_minimum_required(VERSION 3.22)
 
 project(core-lib)
 
-# TODO: if not found - use as external project
-find_package(Protobuf REQUIRED)
-
-message( STATUS "PROTOBUF: include_dirs: ${Protobuf_INCLUDE_DIRS}")
-message( STATUS "PROTOBUF: dir with result: ${CMAKE_CURRENT_BINARY_DIR}")
-message( STATUS "PROTOBUF: libraries: ${Protobuf_LIBRARIES}")
-
-
 get_target_property(MODULES_SDK_INCLUDES modules-sdk INCLUDE_DIRECTORIES)
 
 include_directories(
