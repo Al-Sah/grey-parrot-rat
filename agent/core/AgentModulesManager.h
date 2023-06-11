@@ -18,10 +18,13 @@ class AgentModulesManager : public ModulesManagerBase{
 
 public:
     explicit AgentModulesManager(const std::shared_ptr<ITaskHandler> &requestsHandler);
+    ~AgentModulesManager() override;
 
     bool handle(Task data) override;
     void registerModule(const std::shared_ptr<TaskExecutor>& taskExecutor);
     [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const override;
+
+    void passDataChannel(const std::shared_ptr<rtc::DataChannel>& dc);
 
 private:
     std::map<std::string, std::shared_ptr<TaskExecutor>> modules;

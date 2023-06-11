@@ -13,6 +13,7 @@
 #include "IControlPacketHandler.h"
 #include "IControlPacketSender.h"
 #include "PeerData.h"
+#include "ModuleInfo.h"
 
 
 struct ConnectionConfig {
@@ -59,6 +60,10 @@ public:
     void setPeerStateChangeCallback(
             const std::function<void(bool, std::string, std::uint64_t)> &onPeerStateChange);
 
+    std::shared_ptr<rtc::DataChannel> createDataChannel(const ModuleInfo& moduleInfo);
+
+    void setOnDataChannel(const std::function<void(std::shared_ptr<rtc::DataChannel>)> &onDataChannel);
+
     void connectToPeer(const std::string& peerId);
     void disconnectFromCurrentPeer();
 private:
@@ -68,6 +73,7 @@ private:
 
     std::function<void(bool, std::string, std::uint64_t)> onC2StateChange;
     std::function<void(bool, std::string, std::uint64_t)> onPeerStateChange;
+    std::function<void(std::shared_ptr<rtc::DataChannel>)> onDataChannel;
 
     std::shared_ptr<IControlPacketHandler> packetsHandler;
 

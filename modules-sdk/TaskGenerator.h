@@ -9,6 +9,9 @@
 #include <functional>
 #include "Task.h"
 #include "ModuleInfo.h"
+#include "rtc/datachannel.hpp"
+
+class QWidget;
 
 class TaskGenerator {
 
@@ -22,11 +25,22 @@ public:
 
     void setCallback(const std::function<void(Task)> &aCallback);
 
-    virtual void* getUI() = 0;
+    virtual QWidget* getUI(QWidget* parent) = 0;
+
+
+    void closeDataChanel();
+    void setRequestDCCallback(
+            const std::function<std::shared_ptr<rtc::DataChannel>(ModuleInfo)> &requestDataChannelCallback);
 
 protected:
+
+    virtual void setDataChannelHandlers() = 0;
+
     const ModuleInfo moduleInfo;
     std::function<void(Task)> callback;
+    std::function<std::shared_ptr<rtc::DataChannel>(ModuleInfo)> requestDataChannelCallback;
+
+    std::shared_ptr<rtc::DataChannel> dataChannel;
 };
 
 

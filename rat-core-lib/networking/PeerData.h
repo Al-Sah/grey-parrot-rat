@@ -11,6 +11,7 @@
 struct PeerData {
     std::shared_ptr<rtc::PeerConnection> connection;
     std::shared_ptr<rtc::DataChannel> ctrlChannel;
+    std::vector<std::shared_ptr<rtc::DataChannel>> additionalCtrlChannel;
     std::string remoteId;
 };
 

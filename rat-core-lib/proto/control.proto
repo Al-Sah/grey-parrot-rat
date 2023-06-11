@@ -16,6 +16,7 @@ message ControlHeader{
   uint32 parts = 7;        // number of parts
 
   bool error = 8;
+  bool peer = 9;
 
   enum MessageType {
     SINGLE = 0;

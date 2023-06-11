@@ -8,6 +8,7 @@
 #include <memory>
 #include "TaskGenerator.h"
 #include "ITaskHandler.h"
+#include "BS_thread_pool.hpp"
 
 
 class ModulesManagerBase : public ITaskHandler{
@@ -18,10 +19,15 @@ public:
 
     [[nodiscard]] virtual std::vector<ModuleInfo> getModulesInfo() const = 0;
 
+    void setPool(BS::thread_pool *pPool);
+
 protected:
 
     // handler to pass "Task" from module to the core
     const std::shared_ptr<ITaskHandler> taskHandler;
+
+    BS::thread_pool* pool;
+    std::vector<std::future<void>> runningTasks;
 };
 
 

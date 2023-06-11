@@ -1,3 +1,5 @@
+#include <sstream>
+#include <iomanip>
 #include "MainWindow.h"
 #include "./ui_MainWindow.h"
 #include "AgentDescriptionListItem.h"
@@ -59,7 +61,7 @@ void MainWindow::updateC2ServerConnectionState(const ConnectionChange& change) {
 
     //auto tp =
     // std::chrono::duration_cast<std::chrono::system_clock::time_point::duration>(std::chrono::milliseconds (time));
-    ui->labelLastStateChangeValue->setText(QString::number(change.timestamp));
+    ui->labelLastStateChangeValue->setText(TimeStr(change.timestamp));
 
     QString tmp = isConnected ? "opened" : "closed";
 
@@ -70,7 +72,7 @@ void MainWindow::updatePeerConnectionState(const ConnectionChange &change) {
 
     ui->agentModulesTabs->setEnabled(change.opened);
     ui->labelPeerStateValue->setText(QString::fromStdString(change.state));
-    ui->labelPeerChangeTimeValue->setText(QString::number(change.timestamp));
+    ui->labelPeerChangeTimeValue->setText(TimeStr(change.timestamp));
 }
 
 
@@ -168,14 +170,13 @@ void MainWindow::handleAgentItemClicked(QListWidgetItem* item)
     auto widget = dynamic_cast<AgentDescriptionListItem*>(ui->agentsListWidget->itemWidget(item));
     auto agentDescription = widget->getAgentDescription();
 
-    ui->labelAgentIdValue->setText(QString::fromStdString(agentDescription.device().id()));
-    ui->labelComputerNameValue->setText(QString::fromStdString(agentDescription.device().name()));
-    ui->labelOSValue->setText(QString::fromStdString(agentDescription.device().os()));
+    setAgentPageUI(agentDescription);
 
-    ui->labelVersionValue->setText(QString::fromStdString(agentDescription.app().version()));
-    ui->labelC4ArcValue->setText(QString::fromStdString(agentDescription.app().c4arc()));
-    ui->labelC4PlatformValue->setText(QString::fromStdString(agentDescription.app().c4platform()));
-    ui->labelModulesCountValue->setText(QString::number(agentDescription.app().modules().size()));
+    std::vector<std::string> names;
+    for (const auto &moduleInfo: agentDescription.app().modules()){
+        names.push_back(moduleInfo.name());
+    }
+    setAgentModulesTabs( operatorApp->getTaskGenerators(names));
 
 
     ui->stackedWidget->setCurrentIndex(1);
@@ -185,4 +186,34 @@ void MainWindow::handleAgentItemClicked(QListWidgetItem* item)
 void MainWindow::handleReturnBtnClick() {
     operatorApp->disconnectFromPeer();
     ui->stackedWidget->setCurrentIndex(0);
+}
+
+QString MainWindow::TimeStr(std::uint64_t timestamp) {
+    auto ts_as_time_t = static_cast<std::time_t>(timestamp);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&ts_as_time_t), "%Y-%m-%d %X");
+    return QString::fromStdString(ss.str());
+}
+
+void MainWindow::setAgentPageUI(const msgs::AgentDescription & agentDescription) {
+    ui->labelAgentIdValue->setText(QString::fromStdString(agentDescription.device().id()));
+    ui->labelComputerNameValue->setText(QString::fromStdString(agentDescription.device().name()));
+    ui->labelOSValue->setText(QString::fromStdString(agentDescription.device().os()));
+
+    ui->labelVersionValue->setText(QString::fromStdString(agentDescription.app().version()));
+    ui->labelC4ArcValue->setText(QString::fromStdString(agentDescription.app().c4arc()));
+    ui->labelC4PlatformValue->setText(QString::fromStdString(agentDescription.app().c4platform()));
+    ui->labelModulesCountValue->setText(QString::number(agentDescription.app().modules().size()));
+}
+
+void MainWindow::setAgentModulesTabs(const std::vector<std::shared_ptr<TaskGenerator>> &taskGenerators) {
+    for (const auto &item: taskGenerators){
+        void * moduleUI = item->getUI(this);
+        if(moduleUI == nullptr){
+            continue;
+        }
+        ui->agentModulesTabs->removeTab(0);
+        ui->agentModulesTabs->addTab(static_cast<QWidget*>(moduleUI), QString::fromStdString(item->getModuleInfo().id));
+    }
+
 }

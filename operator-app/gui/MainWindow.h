@@ -21,6 +21,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    static QString TimeStr(std::uint64_t timestamp);
     ~MainWindow() override;
 
 public slots:
@@ -38,6 +39,9 @@ private:
     void handleNodulesDetailsBtnClick();
     void handleAgentItemClicked(QListWidgetItem *item);
     void handleReturnBtnClick();
+
+    void setAgentPageUI(const msgs::AgentDescription & agentDescription);
+    void setAgentModulesTabs(const std::vector<std::shared_ptr<TaskGenerator>> &taskGenerators);
 
     std::uint32_t secondsLeft;
     bool timerSet;

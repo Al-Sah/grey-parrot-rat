@@ -11,6 +11,9 @@
 #include "tasks-managing/TasksManagerBase.h"
 #include "core/OperatorTasksManager.h"
 
+// TODO: tmp solution
+//#include "../modules/echo/EchoMaker.h"
+
 
 // Initialization of static fields
 std::shared_ptr<OperatorApp> OperatorApp::instance{nullptr};
@@ -18,10 +21,13 @@ BS::thread_pool OperatorApp::pool{};
 
 
 
-std::shared_ptr<OperatorApp> OperatorApp::GetInstance() {
+std::shared_ptr<OperatorApp> OperatorApp::GetInstance(QWidget* parent) {
     if(instance == nullptr){
         instance = std::shared_ptr<OperatorApp>(new OperatorApp());
+
         instance->modulesManager->registerModule(instance);
+        //instance->modulesManager->registerModule(std::make_shared<EchoMaker>());
+
     }
     return instance;
 }
@@ -37,8 +43,12 @@ OperatorApp::OperatorApp() : TaskGenerator({"system-state", "0.0.0"}){
             ConnectionConfig("test-operator", "operator", 10));
     tasksManager = std::make_shared<OperatorTasksManager>();
 
-    modulesManager = std::make_shared<OperatorModulesManager>(std::shared_ptr<ITaskHandler>(tasksManager.get()));
-
+    modulesManager = std::make_shared<OperatorModulesManager>(
+            tasksManager,
+            [this](auto moduleInfo){
+                return requestDC(moduleInfo);
+            });
+    modulesManager->setPool(&pool);
 
     // setup dependencies between services
     //
@@ -94,8 +104,7 @@ void OperatorApp::handleResult(Task task) {
     }
 }
 
-
-void *OperatorApp::getUI() {
+QWidget *OperatorApp::getUI(QWidget *parent) {
     return nullptr;
 }
 
@@ -140,4 +149,25 @@ void OperatorApp::disconnectFromPeer() {
 
 void OperatorApp::connectToPeer(const std::string &peer) {
     connectionsManager->connectToPeer(peer);
+}
+
+std::vector<std::shared_ptr<TaskGenerator>> OperatorApp::getTaskGenerators(const std::vector<std::string>& names) {
+    std::vector<std::shared_ptr<TaskGenerator>> res;
+
+    for (const auto &name: names){
+        auto modulePrt = modulesManager->getModule(name);
+        if(modulePrt != nullptr){
+            res.push_back(modulePrt);
+        }
+    }
+    return res;
+}
+
+
+std::shared_ptr<rtc::DataChannel> OperatorApp::requestDC(const ModuleInfo& moduleInfo) {
+    return connectionsManager->createDataChannel(moduleInfo);
+}
+
+void OperatorApp::setDataChannelHandlers() {
+
 }

@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <functional>
+#include "rtc/datachannel.hpp"
 
 #include "Task.h"
 #include "ModuleInfo.h"
@@ -23,10 +24,18 @@ public:
 
     void setCallback(const std::function<void(Task)> &aCallback);
 
+    virtual void closeDataChanel();
+    void setDataChannel(const std::shared_ptr<rtc::DataChannel> &dataChannel);
+
 protected:
+
+
+    virtual void setDataChannelHandlers() = 0;
+
     const ModuleInfo moduleInfo;
     std::function<void(Task)> callback;
+    std::shared_ptr<rtc::DataChannel> dataChannel;
 };
 
 
-#endif //GREY_PARROT_SDK_TASK_EXECUTOR_H
+#endif //GREY_PARROT_RAT_SDK_TASK_EXECUTOR_H

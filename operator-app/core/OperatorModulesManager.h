@@ -17,15 +17,21 @@
 class OperatorModulesManager : public ModulesManagerBase{
 
 public:
-    explicit OperatorModulesManager(const std::shared_ptr<ITaskHandler> &taskHandler);
+    OperatorModulesManager(
+            const std::shared_ptr<ITaskHandler> &taskHandler,
+            const std::function<std::shared_ptr<rtc::DataChannel>(ModuleInfo)>& requestDataChannelCallback);
+
     bool handle(Task task) override;
+
     void registerModule(const std::shared_ptr<TaskGenerator>& taskGenerator);
+
     [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const override;
+    [[nodiscard]] std::shared_ptr<TaskGenerator> getModule(const std::string& name);
 
 private:
 
     std::map<std::string, std::shared_ptr<TaskGenerator>> modules;
-
+    const std::function<std::shared_ptr<rtc::DataChannel>(ModuleInfo)> requestDataChannelCallback;
 };
 
 

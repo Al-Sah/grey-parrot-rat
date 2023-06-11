@@ -14,10 +14,14 @@ bool AgentModulesManager::handle(Task task) {
         // TODO: handle error
         return false;
     }
-    // TODO: run in another thread ...
-    std::cout << "TaskExecutorsManager: delegating task "
-              << task.id << "; module '" << task.module << "'" << std::endl;
-    modules_iter->second->execute(task);
+
+    std::cout << "TaskExecutorsManager: delegating task " << task.id << "; module '" << task.module << "'" << std::endl;
+    if(pool != nullptr) {
+        runningTasks.push_back(pool->submit([taskExecutor = modules_iter->second, task]() {
+            taskExecutor->execute(task);
+        }));
+    }
+
     return true;
 }
 
@@ -25,8 +29,11 @@ bool AgentModulesManager::handle(Task task) {
 void AgentModulesManager::registerModule(const std::shared_ptr<TaskExecutor>& taskExecutor) {
 
     taskExecutor->setCallback([this](const Task& task) {
-        // TODO: run in separate thread
-        taskHandler->handle(task);
+        auto res = pool->submit([this,task](){
+            // TODO: remove task from vector
+            taskHandler->handle(task);
+        });
+        res.get();
     });
 
     modules.emplace(taskExecutor->getModuleInfo().id, taskExecutor);
@@ -45,3 +52,15 @@ std::vector<ModuleInfo> AgentModulesManager::getModulesInfo() const {
 
 AgentModulesManager::AgentModulesManager(const std::shared_ptr<ITaskHandler> &requestsHandler)
     : ModulesManagerBase(requestsHandler) {}
+
+AgentModulesManager::~AgentModulesManager() {
+    using namespace std::chrono_literals;
+    for (const auto &item: runningTasks){
+        item.wait_for(std::chrono::microseconds(1s));
+    }
+}
+
+void AgentModulesManager::passDataChannel(const std::shared_ptr<rtc::DataChannel>& dc) {
+    auto taskExecutor = modules[dc->label()];
+    taskExecutor->setDataChannel(dc);
+}

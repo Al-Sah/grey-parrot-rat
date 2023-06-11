@@ -41,6 +41,7 @@ bool AgentTasksManager::handle(Task response) {
     header->set_module(response.module);
     header->set_requestid(response.id);
     header->set_isclosing(response.isClosing);
+    header->set_peer(response.asPeer);
 
     controlPacket.set_payload(std::get<std::string>(response.payload));
 
@@ -48,11 +49,7 @@ bool AgentTasksManager::handle(Task response) {
     messagesSender->send(controlPacket);
 
     // TODO: log it
-    std::cout << "Sending ControlPacket:\n"
-              << " | module: " << response.module << std::endl
-            << " | task_id: " << response.id << std::endl
-            << " | closing: " << response.isClosing << std::endl
-            << " | in ram: " << response.isFilepath << std::endl;
+    std::cout << "Sending ControlPacket | module: " << response.module << ", task_id: " << response.id << std::endl;
 
     return true;
 }

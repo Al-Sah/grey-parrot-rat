@@ -60,6 +60,9 @@ private:
     static void handleSystemSignal(int signal);
 
     msgs::AgentDescription to_proto_message();
+
+protected:
+    void setDataChannelHandlers() override;
 };
 
 

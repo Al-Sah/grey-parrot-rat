@@ -18,3 +18,12 @@ void TaskExecutor::setCallback(const std::function<void(Task)> &aCallback) {
 ModuleInfo TaskExecutor::getModuleInfo() const {
     return moduleInfo;
 }
+
+void TaskExecutor::setDataChannel(const std::shared_ptr<rtc::DataChannel> &dataChannel) {
+    TaskExecutor::dataChannel = dataChannel;
+    setDataChannelHandlers();
+}
+
+void TaskExecutor::closeDataChanel() {
+
+}

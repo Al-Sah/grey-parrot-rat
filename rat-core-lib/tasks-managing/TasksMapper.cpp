@@ -15,7 +15,9 @@ Task TasksMapper::mapSingle(const msgs::ControlPacket& packet) {
             .isPartial = false,
             .part = std::nullopt,
             .parts = std::nullopt,
-            .size = std::nullopt
+            .size = std::nullopt,
+
+            .asPeer = packet.header().peer()
     };
 }
 
@@ -30,7 +32,9 @@ Task TasksMapper::mapPartial(const TaskInfo& taskInfo, const msgs::ControlPacket
             .isPartial = true,
             .part = packet.header().partition(),
             .parts = packet.header().parts(),
-            .size = packet.header().payloadsize()
+            .size = packet.header().payloadsize(),
+
+            .asPeer = packet.header().peer()
     };
 }
 

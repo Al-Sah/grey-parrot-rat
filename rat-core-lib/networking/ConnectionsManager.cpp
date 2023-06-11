@@ -19,6 +19,7 @@ std::string ConnectionConfig::getUrl() const {
 
 ConnectionsManager::ConnectionsManager(ConnectionConfig config) : config(std::move(config)), peerData{} {
 
+    //rtc::InitLogger(rtc::LogLevel::Debug);
 
     C2ServerChannelConfiguration cfg( // TODO add valid handlers
             [](){
@@ -86,13 +87,27 @@ void ConnectionsManager::handleC2ServerMessage(std::vector<std::byte> &data) {
 
 void ConnectionsManager::send(const msgs::ControlPacket& data) {
 
+    if(data.header().peer()){
+        const std::string serializedString = data.SerializeAsString();
+        if(!peerData.ctrlChannel->send(CoreUtils::convert(serializedString))){
+            std::cout << "DATA: DataChannel failed to send data " << std::endl;
+        }
+        return;
+    }
+
     msgs::NetworkMessage message{};
     message.mutable_control()->CopyFrom(data);
-
     const std::string serializedString = message.SerializeAsString();
     c2ServerChannel->send(CoreUtils::convert(serializedString));
 }
 
+std::shared_ptr<rtc::DataChannel> ConnectionsManager::createDataChannel(const ModuleInfo& moduleInfo){
+
+    if(peerData.remoteId.empty() || peerData.connection == nullptr || peerData.ctrlChannel == nullptr){
+        return nullptr;
+    }
+    return peerData.connection->createDataChannel(moduleInfo.id);
+}
 
 void ConnectionsManager::setC2StateChangeCallback(
         const std::function<void(bool, std::string, std::uint64_t)> &pOnC2StateChange) {
@@ -105,7 +120,6 @@ void ConnectionsManager::setPeerStateChangeCallback(
 }
 
 void ConnectionsManager::disconnectFromCurrentPeer() {
-    peerData.remoteId.clear();
 
     if(peerData.ctrlChannel != nullptr){
         peerData.ctrlChannel->close();
@@ -117,6 +131,15 @@ void ConnectionsManager::disconnectFromCurrentPeer() {
         peerData.connection->clearStats();
         peerData.connection = nullptr;
     }
+
+    for (const auto &item: peerData.additionalCtrlChannel){
+        if(item->isOpen()){
+            item->close();
+        }
+    }
+    peerData.additionalCtrlChannel.clear();
+
+    peerData.remoteId.clear();
 }
 
 void ConnectionsManager::connectToPeer(const std::string &peerId) {
@@ -133,7 +156,7 @@ void ConnectionsManager::setupPeerConnection() {
     peerData.connection = std::make_shared<rtc::PeerConnection>(rtcConfig);
 
     peerData.connection->onStateChange([this](rtc::PeerConnection::State state) {
-        std::cout << "SIGNALING: Called onStateChange: " << state << std::endl;
+        std::cout << "SIGNALING: PeerConnection state change: " << state << std::endl;
 
         if(onC2StateChange != nullptr){
             onPeerStateChange(
@@ -149,11 +172,11 @@ void ConnectionsManager::setupPeerConnection() {
     });
 
     peerData.connection->onSignalingStateChange([](rtc::PeerConnection::SignalingState state){
-        std::cout << "SIGNALING: Called onSignalingStateChange: " << state << std::endl;
+        std::cout << "SIGNALING: PeerConnection signaling state change: " << state << std::endl;
     });
 
     peerData.connection->onGatheringStateChange([](rtc::PeerConnection::GatheringState state) {
-        std::cout << "SIGNALING: Gathering State: " << state << std::endl;
+        std::cout << "SIGNALING: PeerConnection gathering State: " << state << std::endl;
     });
 
     peerData.connection->onLocalDescription([this](const rtc::Description& description) {
@@ -183,8 +206,13 @@ void ConnectionsManager::setupPeerConnection() {
         std::cout << "SIGNALING: DataChannel from " << peerData.remoteId << " received with label \""
                   << dc->label() << "\"" << std::endl;
 
-        if(dc->label() == "ctrl")
-        peerData.ctrlChannel = dc;
+        if(dc->label() == "ctrl"){
+            peerData.ctrlChannel = dc;
+            setupCtrlDataChannel();
+        } else{
+            peerData.additionalCtrlChannel.push_back(dc);
+            onDataChannel(dc);
+        }
     });
 }
 
@@ -239,7 +267,6 @@ void ConnectionsManager::setupCtrlDataChannel(){
 
     peerData.ctrlChannel->onOpen([this]() {
         std::cout << "SIGNALING: DataChannel from " << peerData.remoteId << " open" << std::endl;
-        peerData.ctrlChannel->send("Hello from " + config.connectionId);
     });
 
     peerData.ctrlChannel->onError([](const std::string& error){
@@ -251,12 +278,24 @@ void ConnectionsManager::setupCtrlDataChannel(){
     });
 
     peerData.ctrlChannel->onMessage([this](auto data) {
-        // data holds either std::string or rtc::binary
-        if (std::holds_alternative<std::string>(data))
-            std::cout << "Message from " <<  peerData.remoteId << " received: " << std::get<std::string>(data)
-                      << std::endl;
-        else
-            std::cout << "Binary message from " <<  peerData.remoteId
-                      << " received, size=" << std::get<rtc::binary>(data).size() << std::endl;
+
+        if (!std::holds_alternative<rtc::binary>(data)) {
+            std::cout << "CTRL Channel: received message is not binary" << std::endl;
+            return;
+        }
+
+        auto binary = std::get<rtc::binary>(data);
+        msgs::ControlPacket message{};
+        bool res = message.ParseFromArray(binary.data(), static_cast<int>(binary.size()));
+
+        if(!res){
+            std::cout << "Failed to parse inbox ControlPacket"; // TODO: log
+            return;
+        }
+        packetsHandler->handleInbox(message);
     });
+}
+
+void ConnectionsManager::setOnDataChannel(const std::function<void(std::shared_ptr<rtc::DataChannel>)> &onDataChannel) {
+    ConnectionsManager::onDataChannel = onDataChannel;
 }

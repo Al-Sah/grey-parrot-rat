@@ -25,6 +25,7 @@
 
 #include "TaskExecutor.h"
 #include "CoreCtrlBridge.h"
+#include "ModuleInfo.h"
 
 
 class OperatorApp : public TaskGenerator {
@@ -34,7 +35,7 @@ public:
     OperatorApp(OperatorApp &other) = delete;
     void operator=(const OperatorApp &) = delete;
 
-    static std::shared_ptr<OperatorApp> GetInstance();
+    static std::shared_ptr<OperatorApp> GetInstance(QWidget* parent = nullptr);
 
     void stop();
     void connect(const std::string& c2sever);
@@ -44,6 +45,9 @@ public:
     void connectToPeer(const std::string& peer);
     void disconnectFromPeer();
 
+    std::shared_ptr<rtc::DataChannel> requestDC(const ModuleInfo &moduleInfo);
+
+    [[nodiscard]] std::vector<std::shared_ptr<TaskGenerator>> getTaskGenerators(const std::vector<std::string>& names);
     [[nodiscard]] std::vector<ModuleInfo> getModulesInfo() const;
     [[nodiscard]] std::vector<TaskInfo> getRunningTasks() const;
     [[nodiscard]] const std::string &getVersion() const;
@@ -51,13 +55,19 @@ public:
 private:
 
     // OperatorApp as TaskGenerator does not have a gui
-    void *getUI() override;
+public:
+    QWidget *getUI(QWidget *parent) override;
+
+private:
 
 
     OperatorApp();
+
+protected:
+    void setDataChannelHandlers() override;
+
+private:
     void handleResult(Task task) override;
-
-
 
     const std::string version = GREY_PARROT_OPERATOR_APP_VERSION;
     std::future<void> connectResult;

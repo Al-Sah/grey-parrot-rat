@@ -43,6 +43,7 @@ bool OperatorTasksManager::handle(Task data) {
     header->set_module(data.module);
     header->set_requestid(data.id);
     header->set_isclosing(data.isClosing);
+    header->set_peer(data.asPeer);
 
     controlPacket.set_payload(std::get<std::string>(data.payload));
 

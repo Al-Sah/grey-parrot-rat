@@ -110,6 +110,11 @@ Agent::Agent(std::unique_ptr<IDeviceDetailsCollector> infoCollector) :
 
     tasksManager = std::make_shared<AgentTasksManager>();
     modulesManager = std::make_shared<AgentModulesManager>(tasksManager);
+    modulesManager->setPool(&pool);
+
+    connectionsManager->setOnDataChannel([this](const std::shared_ptr<rtc::DataChannel>& dc){
+        modulesManager->passDataChannel(dc);
+    });
 
 
     // setup dependencies between services
@@ -176,3 +181,5 @@ msgs::AgentDescription Agent::to_proto_message() {
     }
     return agentDescription;
 }
+
+void Agent::setDataChannelHandlers() {}

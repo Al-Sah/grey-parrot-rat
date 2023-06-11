@@ -38,8 +38,8 @@ struct Task {
     const std::optional<std::uint16_t> parts;
     /// Full size of payload (all partitions)
     const std::optional<std::uint32_t> size;
+
+    const bool asPeer;
 };
 
-
-
-#endif //GREY_PARROT_SDK_TASK_H
+#endif //GREY_PARROT_RAT_SDK_TASK_H
