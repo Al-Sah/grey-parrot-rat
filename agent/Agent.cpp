@@ -14,7 +14,7 @@
 #include "core/AgentTasksManager.h"
 
 // TODO: tmp solution
-//#include "../modules/echo/EchoHandler.h"
+#include "../modules/echo/EchoHandler.h"
 
 #if defined(PLATFORM_IS_LINUX)
     #include "platform-info/collectors/LinuxInfoCollector.h"
@@ -62,7 +62,7 @@ Agent *Agent::GetInstance() {
 int Agent::runPerpetual() {
 
     modulesManager->registerModule(std::shared_ptr<TaskExecutor>(this));
-    //modulesManager->registerModule(std::make_shared<EchoHandler>());
+    modulesManager->registerModule(std::make_shared<EchoHandler>());
 
     auto result = pool.submit([this](){
         connectionsManager->start("localhost:8080");

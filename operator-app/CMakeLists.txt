@@ -54,6 +54,7 @@ target_link_libraries(operator-app PRIVATE
         Qt${USING_QT}::Core
         Qt${USING_QT}::Widgets
         core-lib
+        echo-module-operator
         )
 
 if (WIN32)

@@ -52,4 +52,4 @@ add_executable(agent
         ${BOT_PLATFORM_DEPEND_HEADERS}
         )
 
-target_link_libraries(agent core-lib)
+target_link_libraries(agent core-lib echo-module-agent)

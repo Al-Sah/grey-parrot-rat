@@ -12,7 +12,7 @@
 #include "core/OperatorTasksManager.h"
 
 // TODO: tmp solution
-//#include "../modules/echo/EchoMaker.h"
+#include "../modules/echo/EchoMaker.h"
 
 
 // Initialization of static fields
@@ -26,7 +26,7 @@ std::shared_ptr<OperatorApp> OperatorApp::GetInstance(QWidget* parent) {
         instance = std::shared_ptr<OperatorApp>(new OperatorApp());
 
         instance->modulesManager->registerModule(instance);
-        //instance->modulesManager->registerModule(std::make_shared<EchoMaker>());
+        instance->modulesManager->registerModule(std::make_shared<EchoMaker>());
 
     }
     return instance;
