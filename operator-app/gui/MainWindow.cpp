@@ -212,7 +212,6 @@ void MainWindow::setAgentModulesTabs(const std::vector<std::shared_ptr<TaskGener
         if(moduleUI == nullptr){
             continue;
         }
-        ui->agentModulesTabs->removeTab(0);
         ui->agentModulesTabs->addTab(static_cast<QWidget*>(moduleUI), QString::fromStdString(item->getModuleInfo().id));
     }
 

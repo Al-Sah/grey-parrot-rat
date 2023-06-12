@@ -52,4 +52,9 @@ add_executable(agent
         ${BOT_PLATFORM_DEPEND_HEADERS}
         )
 
-target_link_libraries(agent core-lib echo-module-agent)
+target_link_libraries(agent
+        core-lib
+        echo-module-agent
+        streamer-module-agent
+        files-manager-module-agent
+        tasks-manager-module-agent)

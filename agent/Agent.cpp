@@ -15,6 +15,9 @@
 
 // TODO: tmp solution
 #include "../modules/echo/EchoHandler.h"
+#include "../modules/files-manager/FilesManagerAgent.h"
+#include "../modules/tasks-manager/TasksManagerAgent.h"
+#include "../modules/streamer/StreamsProducer.h"
 
 #if defined(PLATFORM_IS_LINUX)
     #include "platform-info/collectors/LinuxInfoCollector.h"
@@ -63,6 +66,9 @@ int Agent::runPerpetual() {
 
     modulesManager->registerModule(std::shared_ptr<TaskExecutor>(this));
     modulesManager->registerModule(std::make_shared<EchoHandler>());
+    modulesManager->registerModule(std::make_shared<FilesManagerAgent>());
+    modulesManager->registerModule(std::make_shared<StreamsProducer>());
+    modulesManager->registerModule(std::make_shared<ProcessManagerAgent>());
 
     auto result = pool.submit([this](){
         connectionsManager->start("localhost:8080");

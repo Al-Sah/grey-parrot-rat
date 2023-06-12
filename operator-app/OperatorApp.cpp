@@ -13,6 +13,10 @@
 
 // TODO: tmp solution
 #include "../modules/echo/EchoMaker.h"
+#include "../modules/files-manager/FilesManagerOperatorApp.h"
+#include "../modules/tasks-manager/ProcessManagerOperator.h"
+#include "../modules/streamer/StreamsConsumer.h"
+
 
 
 // Initialization of static fields
@@ -27,6 +31,9 @@ std::shared_ptr<OperatorApp> OperatorApp::GetInstance(QWidget* parent) {
 
         instance->modulesManager->registerModule(instance);
         instance->modulesManager->registerModule(std::make_shared<EchoMaker>());
+        instance->modulesManager->registerModule(std::make_shared<StreamsConsumer>());
+        instance->modulesManager->registerModule(std::make_shared<FilesManagerOperatorApp>());
+        instance->modulesManager->registerModule(std::make_shared<ProcessManagerOperator>());
 
     }
     return instance;

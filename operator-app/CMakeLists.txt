@@ -55,6 +55,9 @@ target_link_libraries(operator-app PRIVATE
         Qt${USING_QT}::Widgets
         core-lib
         echo-module-operator
+        streamer-module-operator
+        files-manager-module-operator
+        tasks-manager-module-operator
         )
 
 if (WIN32)

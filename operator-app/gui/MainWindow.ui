@@ -289,8 +289,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>858</width>
-                 <height>305</height>
+                 <width>498</width>
+                 <height>98</height>
                 </rect>
                </property>
               </widget>
@@ -633,13 +633,8 @@
         <item row="4" column="0" colspan="5">
          <widget class="QTabWidget" name="agentModulesTabs">
           <property name="currentIndex">
-           <number>0</number>
+           <number>-1</number>
           </property>
-          <widget class="QWidget" name="tab">
-           <attribute name="title">
-            <string>Tab 1</string>
-           </attribute>
-          </widget>
          </widget>
         </item>
        </layout>

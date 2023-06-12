@@ -13,6 +13,7 @@ macro(find_qt_libraries)
 
     if(QT_DIR_PATH STREQUAL "")
         message(STATUS "QT not found, probably will fail now ... ")
+        #list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.4.2/gcc_64")
     else()
         list(APPEND CMAKE_PREFIX_PATH "${QT_DIR_PATH}")
         message(STATUS "QT path found: ${QT_DIR_PATH}")
