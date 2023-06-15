@@ -54,9 +54,9 @@ add_library(core-lib STATIC
         )
 
 target_link_libraries(core-lib
-        libdatachannel
+        #libdatachannel
         modules-sdk
         ${Protobuf_LIBRARIES}
         )
 
-add_dependencies(core-lib sd-party-libdatachannel)
+#add_dependencies(core-lib sd-party-libdatachannel)

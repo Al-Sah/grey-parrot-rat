@@ -16,10 +16,7 @@ include_directories(
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS general-data.proto)
 
 
-set(SDK_SOURCES
-        TaskExecutor.cpp
-        TaskGenerator.cpp
-        )
+set(SDK_SOURCES TaskExecutor.cpp TaskGenerator.cpp)
 
 set(SDK_HEADERS
         Task.h
@@ -29,3 +26,7 @@ set(SDK_HEADERS
         )
 
 add_library(modules-sdk STATIC ${SDK_HEADERS} ${SDK_SOURCES} ${PROTO_SRCS} ${PROTO_HDRS})
+
+add_dependencies(modules-sdk sd-party-libdatachannel)
+
+target_link_libraries(modules-sdk PUBLIC libdatachannel ${Protobuf_LIBRARIES})

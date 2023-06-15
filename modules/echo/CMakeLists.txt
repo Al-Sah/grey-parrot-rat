@@ -40,3 +40,5 @@ target_link_libraries(echo-module-operator PRIVATE
         )
 
 
+add_dependencies(echo-module-agent modules-sdk)
+add_dependencies(echo-module-operator modules-sdk)
